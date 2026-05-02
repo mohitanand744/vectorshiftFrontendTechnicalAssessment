@@ -1,4 +1,4 @@
-import { useStore } from '../store/store';
+import { useStore } from '../../store/store';
 import { shallow } from 'zustand/shallow';
 import { ChartBarIcon, CubeIcon, ShareIcon } from '@heroicons/react/24/outline';
 
@@ -11,8 +11,8 @@ export const FlowStats = () => {
     const { nodes, edges } = useStore(selector, shallow);
 
     return (
-        <div className="z-10 flex flex-col gap-4 pointer-events-none">
-            <div className="bg-[#0d1117]/60 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 pointer-events-auto min-w-[200px]">
+        <div className="z-10  flex flex-col gap-4 pointer-events-none">
+            <div className="bg-black/60 backdrop-blur-xl border border-primary/40 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 pointer-events-auto min-w-[200px]">
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
                         <ChartBarIcon className="w-5 h-5" />

@@ -2,9 +2,9 @@ import { ClockIcon, TrashIcon, PlayIcon, XMarkIcon, CommandLineIcon } from '@her
 import { useStore } from '../../store/store';
 import { shallow } from 'zustand/shallow';
 import { useReactFlow } from 'reactflow';
-import { EmptyState } from '../EmptyState';
-import { Button } from '../Button';
-import Modal from './Modal';
+import { EmptyState } from './EmptyState';
+import { Button } from '../ui/Button';
+import Modal from '../ui/Modal';
 
 export const SavedFlows = ({ isOpen, onClose }) => {
     const { history, removeHistoryItem, setNodes, setEdges, setCurrentFlowId, setCurrentProjectName } = useStore(

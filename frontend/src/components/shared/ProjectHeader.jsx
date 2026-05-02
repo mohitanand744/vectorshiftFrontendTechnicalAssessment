@@ -1,8 +1,8 @@
 import React from 'react';
-import { useStore } from '../store/store';
+import { useStore } from '../../store/store';
 import { shallow } from 'zustand/shallow';
 import { PlusIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
-import { Button } from './Button';
+import { Button } from '../ui/Button';
 import { toast } from 'react-hot-toast';
 
 export const ProjectHeader = ({ onNewProject, onRename }) => {

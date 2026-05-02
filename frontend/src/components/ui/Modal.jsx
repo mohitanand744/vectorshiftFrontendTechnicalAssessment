@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Spinner } from "../loaders/Spinner";
+import { Spinner } from "./Spinner";
 
 const Modal = ({ isOpen, onClose, loading, children, maxWidth = "max-w-md" }) => {
   return (

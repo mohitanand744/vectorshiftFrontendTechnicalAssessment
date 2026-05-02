@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { PipelineToolbar } from '../flow/toolbar';
-import { PipelineUI } from '../flow/ui';
+import { PipelineToolbar } from '../components/flow/PipelineToolbar';
+import { FlowCanvas } from '../components/flow/FlowCanvas';
 import { ReactFlowProvider } from 'reactflow';
-import { SubmitButton } from '../flow/submit';
+import { SubmitButton } from '../components/flow/SubmitButton';
 import toast, { Toaster } from 'react-hot-toast';
-import { Button } from '../components/Button';
+import { Button } from '../components/ui/Button';
 
-import { SavedFlows } from '../components/modals/SavedFlows';
+import { SavedFlows } from '../components/shared/SavedFlows';
 import { ClockIcon } from '@heroicons/react/24/outline';
-import { ProjectHeader } from '../components/ProjectHeader';
-import { PipelineNamingModal } from '../components/modals/PipelineNamingModal';
+import { ProjectHeader } from '../components/shared/ProjectHeader';
+import { PipelineNamingModal } from '../components/shared/PipelineNamingModal';
 import { useStore } from '../store/store';
 
 function App() {
@@ -100,7 +100,7 @@ function App() {
         <div className="flex-1 relative h-full w-full">
 
 
-          <PipelineUI />
+          <FlowCanvas />
 
 
 

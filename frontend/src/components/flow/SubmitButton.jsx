@@ -1,9 +1,9 @@
-import { useStore } from '../store/store';
+import { useStore } from '../../store/store';
 import { shallow } from 'zustand/shallow';
 import { toast } from 'react-hot-toast';
-import { Button } from '../components/Button';
+import { Button } from '../ui/Button';
 import { useState } from 'react';
-import { PipelineNamingModal } from '../components/modals/PipelineNamingModal';
+import { PipelineNamingModal } from '../shared/PipelineNamingModal';
 
 const selector = (state) => ({
     nodes: state.nodes,

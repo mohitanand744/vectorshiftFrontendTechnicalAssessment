@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Handle, Position, useUpdateNodeInternals } from 'reactflow';
 import { XMarkIcon, SparklesIcon, FireIcon, BeakerIcon, BoltIcon } from '@heroicons/react/24/outline';
-import { useStore } from '../store/store';
+import { useStore } from '../../store/store';
 import { shallow } from 'zustand/shallow';
-import { Button } from '../components/Button';
-import { Input } from '../components/input/Input';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 import { motion } from 'framer-motion';
-import { NODE_CONFIGS } from './nodeRegistry';
-import { VARIABLE_PATTERN, SPACE_PATTERN } from '../utils/regex';
+import { NODE_CONFIGS } from './configs/nodeRegistry';
+import { VARIABLE_PATTERN, SPACE_PATTERN } from '../../utils/regex';
 
 export const BaseNode = ({ id, config, data }) => {
     const { title, icon: Icon, themeColor = 'primary', inputs = [], outputs = [], fields = [], width = 250 } = config;

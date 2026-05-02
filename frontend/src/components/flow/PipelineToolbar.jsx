@@ -12,11 +12,10 @@ import {
     Squares2X2Icon
 } from '@heroicons/react/24/outline';
 import { FlowStats } from './FlowStats';
-
 import { useState } from 'react';
-import { DraggableNode } from './draggableNode';
+import { DraggableNode } from './DraggableNode';
 import { useReactFlow } from 'reactflow';
-import { useStore } from '../store/store';
+import { useStore } from '../../store/store';
 
 
 export const PipelineToolbar = () => {
@@ -85,7 +84,7 @@ export const PipelineToolbar = () => {
                 </div>
 
                 <div className="flex items-center justify-between relative z-10">
-                    <div className="flex bg-black/40 border border-primary w-full px-4 py-2 rounded-2xl pl-2 shadow-lg shadow-black items-center gap-4">
+                    <div className="flex bg-black/40 border border-primary/40 w-full px-4 py-2 rounded-2xl pl-2 shadow-lg shadow-black items-center gap-4">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shadow-neon-primary overflow-hidden">
                             <img src="/VectorShift_Logo.jpg" className="w-8 h-8 md:w-10 md:h-10 rounded-xl object-contain" alt="VectorShift" />
                         </div>
@@ -100,7 +99,7 @@ export const PipelineToolbar = () => {
                 </div>
 
                 <div className="relative z-10 flex flex-col gap-8 pb-20 md:pb-0">
-                    <div>
+                    <div className=''>
                         <h1 className="text-sm font-bold text-violet-400 uppercase tracking-widest mb-4">Drag & Drop Builder</h1>
                         <FlowStats />
                     </div>

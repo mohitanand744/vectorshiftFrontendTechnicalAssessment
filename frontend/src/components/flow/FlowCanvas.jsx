@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import ReactFlow, { Controls, Background, MiniMap, MarkerType } from 'reactflow';
-import { useStore } from '../store/store';
+import { useStore } from '../../store/store';
 import { shallow } from 'zustand/shallow';
 import { NodeRenderer } from '../nodes/NodeRenderer';
 
@@ -28,7 +28,7 @@ const selector = (state) => ({
   addNode: state.addNode,
 });
 
-export const PipelineUI = () => {
+export const FlowCanvas = () => {
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const {
