@@ -8,15 +8,16 @@ import 'reactflow/dist/style.css';
 
 const gridSize = 20;
 const nodeTypes = {
-  customInput: NodeRenderer,
+  input: NodeRenderer,
   llm: NodeRenderer,
-  customOutput: NodeRenderer,
+  output: NodeRenderer,
   text: NodeRenderer,
   api: NodeRenderer,
   filter: NodeRenderer,
   math: NodeRenderer,
   delay: NodeRenderer,
   condition: NodeRenderer,
+  Branch: NodeRenderer,
 };
 
 const selector = (state) => ({

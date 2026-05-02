@@ -107,8 +107,8 @@ export const PipelineToolbar = () => {
                     <section className="flex flex-col gap-5">
                         <h2 className="text-[13px] font-bold text-violet-400 uppercase tracking-widest px-1">Core Nodes</h2>
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-                            <DraggableNode type='customInput' label='Input' icon={ArrowRightEndOnRectangleIcon} color="emerald" onClick={onNodeClick} />
-                            <DraggableNode type='customOutput' label='Output' icon={ArrowLeftStartOnRectangleIcon} color="rose" onClick={onNodeClick} />
+                            <DraggableNode type='input' label='Input' icon={ArrowRightEndOnRectangleIcon} color="emerald" onClick={onNodeClick} />
+                            <DraggableNode type='output' label='Output' icon={ArrowLeftStartOnRectangleIcon} color="rose" onClick={onNodeClick} />
                             <DraggableNode type='text' label='Text' icon={DocumentTextIcon} color="violet" onClick={onNodeClick} />
                             <DraggableNode type='llm' label='LLM' icon={CpuChipIcon} color="violet" onClick={onNodeClick} />
                         </div>
@@ -128,6 +128,8 @@ export const PipelineToolbar = () => {
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                             <DraggableNode type='condition' label='Condition' icon={ArrowsRightLeftIcon} color="cyan" onClick={onNodeClick} />
                             <DraggableNode type='delay' label='Delay' icon={ClockIcon} color="orange" onClick={onNodeClick} />
+                            <DraggableNode type='Branch' label='Branch' icon={ArrowsRightLeftIcon} color="primary" onClick={onNodeClick} />
+
                         </div>
                     </section>
                 </div>

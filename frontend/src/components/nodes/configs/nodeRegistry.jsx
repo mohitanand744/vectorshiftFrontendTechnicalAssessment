@@ -11,8 +11,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 export const NODE_CONFIGS = {
-    customInput: {
-        type: 'customInput',
+    input: {
+        type: 'input',
         title: 'Input',
         icon: ArrowRightEndOnRectangleIcon,
         themeColor: 'emerald',
@@ -37,8 +37,8 @@ export const NODE_CONFIGS = {
             }
         ]
     },
-    customOutput: {
-        type: 'customOutput',
+    output: {
+        type: 'output',
         title: 'Output',
         icon: ArrowLeftStartOnRectangleIcon,
         themeColor: 'rose',
@@ -196,6 +196,22 @@ export const NODE_CONFIGS = {
                 label: 'Wait (ms)',
                 type: 'number',
                 default: 1000
+            }
+        ]
+    },
+       Branch: {
+        type: 'Branch',
+        title: 'Branch',
+        icon: ClockIcon,
+        themeColor: 'primary',
+        inputs: [{ id: 'input' }],
+        outputs: [{ id: 'output' }],
+        fields: [
+            {
+                key: 'value',
+                label: 'Wait (ms)',
+                type: 'text',
+                default: '0'
             }
         ]
     }
