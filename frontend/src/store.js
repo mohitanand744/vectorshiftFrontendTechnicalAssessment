@@ -57,9 +57,11 @@ export const useStore = create((set, get) => ({
                     animated: true,
                     markerEnd: {
                         type: MarkerType.ArrowClosed,
-                        color: '#8B5CF6',
+                        color: '#8a01bc',
+                        width: 20,
+                        height: 20,
                     },
-                    style: { stroke: '#8B5CF6' }
+                    style: { stroke: '#8a01bc', strokeWidth: 2 }
                 },
                 get().edges
             ),

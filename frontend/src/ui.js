@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import ReactFlow, { Controls, Background, MiniMap } from 'reactflow';
+import ReactFlow, { Controls, Background, MiniMap, MarkerType } from 'reactflow';
 import { useStore } from './store';
 import { shallow } from 'zustand/shallow';
 import { InputNode } from './nodes/inputNode';
@@ -90,6 +90,22 @@ export const PipelineUI = () => {
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
+  const defaultEdgeOptions = {
+    type: 'smoothstep',
+    animated: true,
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      color: '#8a01bc',
+      width: 20,
+      height: 20,
+    },
+    style: {
+      stroke: '#8a01bc',
+      strokeWidth: 2,
+      zIndex: 999,
+    },
+  };
+
   return (
     <div ref={reactFlowWrapper} className="w-full h-full relative group">
       <ReactFlow
@@ -105,6 +121,7 @@ export const PipelineUI = () => {
         snapToGrid={false}
         snapGrid={[gridSize, gridSize]}
         connectionLineType="smoothstep"
+        defaultEdgeOptions={defaultEdgeOptions}
         className="bg-slate-950"
       >
         <Background color="#1e293b" gap={gridSize} size={3} />
@@ -118,6 +135,7 @@ export const PipelineUI = () => {
             backgroundColor: "#0f172a",
             overflow: "hidden",
           }}
+          className='!mb-16 md:!mb-0'
         />
       </ReactFlow>
     </div>

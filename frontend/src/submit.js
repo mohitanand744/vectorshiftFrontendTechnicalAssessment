@@ -116,7 +116,7 @@ export const SubmitButton = () => {
             onClick={handleSubmit}
             variant="pill"
         >
-            Submit the Pipeline
+            Submit 
         </Button>
     );
 };

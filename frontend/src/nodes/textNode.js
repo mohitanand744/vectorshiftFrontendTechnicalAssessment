@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Position } from 'reactflow';
+import { Position, useUpdateNodeInternals } from 'reactflow';
 import { DocumentTextIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { BaseNode } from './BaseNode';
 import { useStore } from '../store';
@@ -14,6 +14,7 @@ export const TextNode = ({ id, data }) => {
   
   const nodes = useStore(state => state.nodes);
   const updateNodeField = useStore(state => state.updateNodeField);
+  const updateNodeInternals = useUpdateNodeInternals();
   const textareaRef = useRef(null);
 
   const availableNodeNames = useMemo(() => {
@@ -28,7 +29,8 @@ export const TextNode = ({ id, data }) => {
     const matches = [...currText.matchAll(varRegex)];
     const uniqueVars = [...new Set(matches.map(m => m[1]))];
     setVariables(uniqueVars);
-  }, [currText]);
+    updateNodeInternals(id);
+  }, [currText, id, updateNodeInternals]);
 
   useEffect(() => {
     if (textareaRef.current) {
