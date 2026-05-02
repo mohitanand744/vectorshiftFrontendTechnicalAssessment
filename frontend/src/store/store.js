@@ -73,7 +73,7 @@ export const useStore = create(
                                 color: '#8a01bc',
                                 width: 20,
                                 height: 20,
-                            },
+                            }, 
                             style: { stroke: '#8a01bc', strokeWidth: 2 }
                         },
                         get().edges
