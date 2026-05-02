@@ -104,6 +104,20 @@ export const BaseNode = ({ id, config, data }) => {
         handleFieldChange('text', newValue);
         setShowSuggestions(false);
 
+        // MAGIC CONNECTION LOGIC
+        const sourceNode = nodes.find(n => (n.data?.customName || n.id) === suggestion);
+        if (sourceNode) {
+            setTimeout(() => {
+                const targetHandleId = `${id}-${suggestion}`;
+                useStore.getState().onConnect({
+                    source: sourceNode.id,
+                    target: id,
+                    sourceHandle: 'output',
+                    targetHandle: targetHandleId
+                });
+            }, 100);
+        }
+
         setTimeout(() => {
             textareaRef.current.focus();
             const newCursor = before.length + suggestion.length + 4;
@@ -114,13 +128,31 @@ export const BaseNode = ({ id, config, data }) => {
     useEffect(() => {
         if (config.type === 'text') {
             updateNodeInternals(id);
+
+            // Cleanup orphaned edges
+            const currentEdges = useStore.getState().edges;
+            const orphanedEdges = currentEdges.filter(edge =>
+                edge.target === id &&
+                edge.targetHandle &&
+                edge.targetHandle.startsWith(`${id}-`) &&
+                !variables.some(v => `${id}-${v}` === edge.targetHandle)
+            );
+
+            if (orphanedEdges.length > 0) {
+                const { onEdgesChange } = useStore.getState();
+                onEdgesChange(orphanedEdges.map(edge => ({ id: edge.id, type: 'remove' })));
+            }
         }
     }, [variables, id, updateNodeInternals, config.type]);
 
     useEffect(() => {
         if (textareaRef.current) {
+            const { selectionStart, selectionEnd } = textareaRef.current;
+
             textareaRef.current.style.height = 'auto';
             textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+
+            textareaRef.current.setSelectionRange(selectionStart, selectionEnd);
         }
     }, [data?.text]);
 

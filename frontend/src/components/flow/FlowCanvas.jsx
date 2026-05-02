@@ -17,7 +17,6 @@ const nodeTypes = {
   math: NodeRenderer,
   delay: NodeRenderer,
   condition: NodeRenderer,
-  Branch: NodeRenderer,
 };
 
 const selector = (state) => ({

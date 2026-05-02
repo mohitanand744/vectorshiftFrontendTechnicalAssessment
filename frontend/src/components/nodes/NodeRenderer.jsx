@@ -4,7 +4,10 @@ import { NODE_CONFIGS } from './configs/nodeRegistry';
 
 export const NodeRenderer = ({ id, type, data }) => {
     const config = NODE_CONFIGS[type];
-    
+
+    console.log("dataProps", data);
+
+
     if (!config) {
         console.warn(`No configuration found for node type: ${type}`);
         return null;

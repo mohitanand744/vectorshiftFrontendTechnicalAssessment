@@ -128,7 +128,6 @@ export const PipelineToolbar = () => {
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                             <DraggableNode type='condition' label='Condition' icon={ArrowsRightLeftIcon} color="cyan" onClick={onNodeClick} />
                             <DraggableNode type='delay' label='Delay' icon={ClockIcon} color="orange" onClick={onNodeClick} />
-                            <DraggableNode type='Branch' label='Branch' icon={ArrowsRightLeftIcon} color="primary" onClick={onNodeClick} />
 
                         </div>
                     </section>

@@ -198,21 +198,5 @@ export const NODE_CONFIGS = {
                 default: 1000
             }
         ]
-    },
-       Branch: {
-        type: 'Branch',
-        title: 'Branch',
-        icon: ClockIcon,
-        themeColor: 'primary',
-        inputs: [{ id: 'input' }],
-        outputs: [{ id: 'output' }],
-        fields: [
-            {
-                key: 'value',
-                label: 'Wait (ms)',
-                type: 'text',
-                default: '0'
-            }
-        ]
     }
 };
