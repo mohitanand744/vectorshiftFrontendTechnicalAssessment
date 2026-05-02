@@ -128,6 +128,7 @@ function App() {
             isOpen={isNamingModalOpen} 
             onClose={() => setIsNamingModalOpen(false)} 
             onConfirm={handleNameConfirm}
+            initialValue={modalMode === 'rename' ? currentProjectName : ''}
           />
         </div>
       </div>

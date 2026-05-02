@@ -67,9 +67,34 @@ export const BaseNode = ({ id, config, data }) => {
     const handleFieldChange = (key, value) => {
         updateNodeField(id, key, value);
 
+
         if (config.type === 'text' && key === 'text') {
             const matches = [...value.matchAll(VARIABLE_PATTERN)];
             const uniqueVars = [...new Set(matches.map(m => m[1]))];
+            
+            // MAGIC CONNECTION FOR MANUAL TYPING
+            uniqueVars.forEach(v => {
+                if (!variables.includes(v)) { // Only for NEWLY typed variables
+                    const sourceNode = nodes.find(n => (n.data?.customName || n.id) === v);
+                    if (sourceNode) {
+                        setTimeout(() => {
+                            const targetHandleId = `${id}-${v}`;
+                            const edges = useStore.getState().edges;
+                            const alreadyConnected = edges.some(e => e.source === sourceNode.id && e.target === id && e.targetHandle === targetHandleId);
+                            
+                            if (!alreadyConnected) {
+                                useStore.getState().onConnect({
+                                    source: sourceNode.id,
+                                    target: id,
+                                    sourceHandle: 'output',
+                                    targetHandle: targetHandleId
+                                });
+                            }
+                        }, 150); // Slight delay to let Handle render
+                    }
+                }
+            });
+
             setVariables(uniqueVars);
 
             // Suggestion Logic

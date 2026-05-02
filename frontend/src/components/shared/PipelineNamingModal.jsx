@@ -5,7 +5,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import Modal from '../ui/Modal';
 
-export const PipelineNamingModal = ({ isOpen, onClose, onConfirm }) => {
+export const PipelineNamingModal = ({ isOpen, onClose, onConfirm, initialValue = '' }) => {
     const { 
         register, 
         handleSubmit, 
@@ -13,14 +13,18 @@ export const PipelineNamingModal = ({ isOpen, onClose, onConfirm }) => {
         formState: { errors } 
     } = useForm({
         defaultValues: {
-            name: ''
+            name: initialValue
         }
     });
 
-    // Reset form when modal closes or opens
+    // Reset form when modal closes or opens with initial value
     useEffect(() => {
-        if (!isOpen) reset();
-    }, [isOpen, reset]);
+        if (isOpen) {
+            reset({ name: initialValue });
+        } else {
+            reset({ name: '' });
+        }
+    }, [isOpen, initialValue, reset]);
 
     const onSubmit = (data) => {
         onConfirm(data.name.trim());
