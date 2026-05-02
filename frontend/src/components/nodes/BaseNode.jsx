@@ -326,7 +326,7 @@ export const BaseNode = ({ id, config, data }) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.75 }}
-            animate={{ opacity: 1, y: 0, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.5, ease: "easeIn" }}
             className={`rounded-2xl bg-[#0d1117]/60 backdrop-blur-xl border ${error ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-slate-800/50 shadow-2xl'} transition-all duration-300 hover:border-primary/40 group relative`}
             style={{ width: `${width}px` }}
