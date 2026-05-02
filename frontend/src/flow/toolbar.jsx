@@ -85,13 +85,13 @@ export const PipelineToolbar = () => {
                 </div>
 
                 <div className="flex items-center justify-between relative z-10">
-                    <div className="flex items-center gap-2">
+                    <div className="flex bg-black/40 border border-primary w-full px-4 py-2 rounded-2xl pl-2 shadow-lg shadow-black items-center gap-4">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shadow-neon-primary overflow-hidden">
                             <img src="/VectorShift_Logo.jpg" className="w-8 h-8 md:w-10 md:h-10 rounded-xl object-contain" alt="VectorShift" />
                         </div>
                         <div>
                             <h1 className="text-lg md:text-xl font-bold text-white tracking-tight">VectorShift</h1>
-                            <p className="text-[10px] md:text-[12px] text-primary uppercase tracking-[0.2em] font-semibold">Workflow Editor</p>
+                            <p className="text-[10px] md:text-[12px] text-violet-400 uppercase tracking-[0.2em] font-semibold">Workflow Editor</p>
                         </div>
                     </div>
                     <button className="md:hidden text-slate-400 p-2" onClick={() => setIsOpen(false)}>
@@ -106,7 +106,7 @@ export const PipelineToolbar = () => {
                     </div>
 
                     <section className="flex flex-col gap-5">
-                        <h2 className="text-[13px] font-bold text-primary uppercase tracking-widest px-1">Core Nodes</h2>
+                        <h2 className="text-[13px] font-bold text-violet-400 uppercase tracking-widest px-1">Core Nodes</h2>
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                             <DraggableNode type='customInput' label='Input' icon={ArrowRightEndOnRectangleIcon} color="emerald" onClick={onNodeClick} />
                             <DraggableNode type='customOutput' label='Output' icon={ArrowLeftStartOnRectangleIcon} color="rose" onClick={onNodeClick} />
@@ -116,7 +116,7 @@ export const PipelineToolbar = () => {
                     </section>
 
                     <section className="flex flex-col gap-5">
-                        <h2 className="text-[13px] font-bold text-primary uppercase tracking-widest px-1">Processing</h2>
+                        <h2 className="text-[13px] font-bold text-violet-400 uppercase tracking-widest px-1">Processing</h2>
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                             <DraggableNode type='api' label='API' icon={CommandLineIcon} color="indigo" onClick={onNodeClick} />
                             <DraggableNode type='filter' label='Filter' icon={FunnelIcon} color="amber" onClick={onNodeClick} />
@@ -125,7 +125,7 @@ export const PipelineToolbar = () => {
                     </section>
 
                     <section className="flex flex-col gap-5">
-                        <h2 className="text-[13px] font-bold text-primary uppercase tracking-widest px-1">Logic & Timing</h2>
+                        <h2 className="text-[13px] font-bold text-violet-400 uppercase tracking-widest px-1">Logic & Timing</h2>
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                             <DraggableNode type='condition' label='Condition' icon={ArrowsRightLeftIcon} color="cyan" onClick={onNodeClick} />
                             <DraggableNode type='delay' label='Delay' icon={ClockIcon} color="orange" onClick={onNodeClick} />

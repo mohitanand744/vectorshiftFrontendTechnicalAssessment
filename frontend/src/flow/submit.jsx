@@ -2,6 +2,8 @@ import { useStore } from '../store/store';
 import { shallow } from 'zustand/shallow';
 import { toast } from 'react-hot-toast';
 import { Button } from '../components/Button';
+import { useState } from 'react';
+import { PipelineNamingModal } from '../components/modals/PipelineNamingModal';
 
 const selector = (state) => ({
     nodes: state.nodes,
@@ -12,7 +14,9 @@ const selector = (state) => ({
 
 
 export const SubmitButton = () => {
-    const { nodes, edges, currentFlowId, setCurrentFlowId } = useStore(selector, shallow);
+    const { nodes, edges } = useStore(selector, shallow);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [lastStats, setLastStats] = useState(null);
 
 
     const handleSubmit = async () => {
@@ -74,12 +78,12 @@ export const SubmitButton = () => {
                 { duration: 5000 }
             );
 
-            // Save to history using store action
-            useStore.getState().saveToHistory({
-                nodes: nodes.length,
-                edges: edges.length
+            // Silently save progress to history under the current project name
+            useStore.getState().saveToHistory(null, {
+                nodes: data.num_nodes,
+                edges: data.num_edges,
+                is_dag: data.is_dag
             });
-
 
         } catch (error) {
             toast.dismiss(loadingToast);
@@ -91,7 +95,7 @@ export const SubmitButton = () => {
         <Button
             onClick={handleSubmit}
             variant="pill"
-            title="Submit pipeline for analysis"
+            title="Submit and save progress"
         >
             Submit
         </Button>

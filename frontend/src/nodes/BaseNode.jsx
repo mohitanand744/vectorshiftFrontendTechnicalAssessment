@@ -4,6 +4,7 @@ import { XMarkIcon, SparklesIcon, FireIcon, BeakerIcon, BoltIcon } from '@heroic
 import { useStore } from '../store/store';
 import { shallow } from 'zustand/shallow';
 import { Button } from '../components/Button';
+import { Input } from '../components/input/Input';
 import { motion } from 'framer-motion';
 import { NODE_CONFIGS } from './nodeRegistry';
 import { VARIABLE_PATTERN, SPACE_PATTERN } from '../utils/regex';
@@ -261,21 +262,21 @@ export const BaseNode = ({ id, config, data }) => {
                 );
             case 'number':
                 return (
-                    <input
+                    <Input
                         type="number"
                         value={value}
                         onChange={(e) => handleFieldChange(field.key, Number(e.target.value))}
-                        className="w-full bg-[#050505]/50 border border-slate-700/50 text-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary/50 transition-all font-mono"
+                        className="font-mono text-xs"
                     />
                 );
             case 'text':
             default:
                 return (
-                    <input
+                    <Input
                         type="text"
                         value={value}
                         onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                        className="w-full bg-[#050505]/50 border border-slate-700/50 text-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary/50 transition-all font-mono"
+                        className="font-mono text-xs"
                     />
                 );
         }
@@ -333,8 +334,8 @@ export const BaseNode = ({ id, config, data }) => {
             ))}
 
             {/* Header */}
-            <div className="px-4 py-3 bg-slate-900/40 border-b border-slate-800 flex items-center justify-between relative z-10">
-                <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+            <div className="px-4 py-3 bg-slate-900/40 border-b border-slate-800 flex items-center justify-between relative overflow-hidden z-10">
+                <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} to-transparent rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
                 <div className="flex items-center gap-3 relative z-10">
                     <div className={`flex items-center justify-center w-6 h-6 rounded-md ${theme.bg} ${theme.text} border ${theme.border} ${theme.shadow}`}>
                         {Icon && <Icon className="w-4 h-4" />}
@@ -354,11 +355,12 @@ export const BaseNode = ({ id, config, data }) => {
                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Node Name</label>
                         {error && <span className="text-[8px] font-bold text-rose-400 uppercase animate-pulse">{error}</span>}
                     </div>
-                    <input
+                    <Input
                         type="text"
                         value={localName}
                         onChange={handleNameChange}
-                        className={`w-full bg-[#050505]/50 border ${error ? 'border-rose-500/50 text-rose-200' : 'border-slate-700/50 text-slate-200'} rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 transition-all font-mono`}
+                        error={error}
+                        className="font-mono"
                     />
                 </div>
 

@@ -14,8 +14,17 @@ export const useStore = create(
             nodes: [],
             edges: [],
             nodeIDs: {},
+            currentProjectName: 'Untitled Pipeline',
             currentFlowId: null,
-            history: [], // Centralized history
+            history: [],
+            
+            clearCanvas: () => set({ 
+                nodes: [], 
+                edges: [], 
+                nodeIDs: {}, 
+                currentFlowId: null,
+                currentProjectName: 'Untitled Pipeline'
+            }),
 
             getNodeID: (type) => {
                 const newIDs = { ...get().nodeIDs };
@@ -84,13 +93,14 @@ export const useStore = create(
             },
 
             // History Actions
-            saveToHistory: (stats) => {
-                const { nodes, edges, currentFlowId, history } = get();
+            saveToHistory: (title, stats) => {
+                const { nodes, edges, currentFlowId, history, currentProjectName } = get();
                 const flowId = currentFlowId || Date.now();
+                const finalTitle = title || currentProjectName;
                 
                 const newEntry = {
                     id: flowId,
-                    timestamp: new Date().toISOString(),
+                    title: finalTitle,
                     nodes: [...nodes],
                     edges: [...edges],
                     stats: stats || { nodes: nodes.length, edges: edges.length }
@@ -132,10 +142,12 @@ export const useStore = create(
                 });
             },
 
-            clearHistory: () => set({ history: [] }),
-            
+            removeHistoryItem: (id) => {
+                set({ history: get().history.filter(item => item.id !== id) });
+            },
             setNodes: (nodes) => set({ nodes }),
             setEdges: (edges) => set({ edges }),
+            setCurrentProjectName: (name) => set({ currentProjectName: name }),
             setCurrentFlowId: (currentFlowId) => set({ currentFlowId }),
         }),
         {
