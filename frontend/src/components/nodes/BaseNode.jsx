@@ -325,9 +325,9 @@ export const BaseNode = ({ id, config, data }) => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.75 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.5, ease: "easeIn" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className={`rounded-2xl bg-[#0d1117]/60 backdrop-blur-xl border ${error ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-slate-800/50 shadow-2xl'} transition-all duration-300 hover:border-primary/40 group relative`}
             style={{ width: `${width}px` }}
         >
@@ -347,7 +347,7 @@ export const BaseNode = ({ id, config, data }) => {
                         type="target"
                         position={Position.Left}
                         id={h.id}
-                        className={`!static !min-w-4 !min-h-4 !rounded-full !bg-white !border-[1.5px] !border-[#0d1117] !transition-all hover:!scale-150 z-20 ${h.className || ''}`}
+                        className={`!static !min-w-4 !min-h-4 !rounded-full !bg-violet-500 !border-[1.5px] !border-[#0d1117] !transition-all hover:!scale-1 z-20 ${h.className || ''}`}
                     />
                 </div>
             ))}
@@ -360,11 +360,10 @@ export const BaseNode = ({ id, config, data }) => {
                         type="source"
                         position={Position.Right}
                         id={h.id}
-                        className={`!static !min-w-4 !min-h-4 !rounded-full !bg-white !border-[1.5px] !border-[#0d1117] !transition-all hover:!scale-150 z-20 ${h.className || ''}`}
+                        className={`!static !min-w-4 !min-h-4 !rounded-full !bg-violet-500 !border-[1.5px] !border-[#0d1117] !transition-all hover:!scale-1 z-20 ${h.className || ''}`}
                     />
                 </div>
             ))}
-
             {/* Header */}
             <div className="px-4 py-3 bg-slate-900/40 border-b border-slate-800 flex items-center justify-between relative overflow-hidden z-10">
                 <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} to-transparent rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
