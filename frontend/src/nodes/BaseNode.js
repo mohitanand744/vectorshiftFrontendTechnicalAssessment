@@ -1,211 +1,316 @@
-import { Handle, Position } from 'reactflow';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useRef } from 'react';
+import { Handle, Position, useUpdateNodeInternals } from 'reactflow';
+import { XMarkIcon, SparklesIcon, FireIcon, BeakerIcon, BoltIcon } from '@heroicons/react/24/outline';
 import { useStore } from '../store';
 import { Button } from '../Button';
 import { motion } from 'framer-motion';
-import React, { useState } from 'react';
 
+export const BaseNode = ({ id, config, data }) => {
+    const { title, icon: Icon, themeColor = 'primary', inputs = [], outputs = [], fields = [], width = 250 } = config;
 
-export const BaseNode = ({
-  id,
-  title,
-  icon: Icon,
-  width = 250,
-  height,
-  themeColor = 'primary',
-  handles = [],
-  children
-}) => {
-  const removeNode = useStore(state => state.removeNode);
-  const nodes = useStore(state => state.nodes);
-  const updateNodeField = useStore(state => state.updateNodeField);
+    const removeNode = useStore(state => state.removeNode);
+    const nodes = useStore(state => state.nodes);
+    const updateNodeField = useStore(state => state.updateNodeField);
+    const updateNodeInternals = useUpdateNodeInternals();
 
-  const currentNode = nodes.find(n => n.id === id);
-  const currentCustomName = currentNode?.data?.customName || id;
+    const currentNode = nodes.find(n => n.id === id);
+    const currentCustomName = currentNode?.data?.customName || id;
 
-  const [localName, setLocalName] = useState(currentCustomName);
-  const [error, setError] = useState('');
+    const [localName, setLocalName] = useState(currentCustomName);
+    const [error, setError] = useState('');
 
-  const handleNameChange = (e) => {
-    const newName = e.target.value;
-    setLocalName(newName);
+    // For TextNode dynamic handles
+    const [variables, setVariables] = useState([]);
+    const textareaRef = useRef(null);
 
-    const isDuplicate = nodes.some(n => n.id !== id && (n.data?.customName === newName || n.id === newName));
+    const handleNameChange = (e) => {
+        const newName = e.target.value;
+        setLocalName(newName);
+        const isDuplicate = nodes.some(n => n.id !== id && (n.data?.customName === newName || n.id === newName));
+        if (isDuplicate) {
+            setError('Name taken');
+        } else {
+            setError('');
+            updateNodeField(id, 'customName', newName);
+        }
+    };
 
-    if (isDuplicate) {
-      setError('Name taken');
-    } else {
-      setError('');
-      updateNodeField(id, 'customName', newName);
-    }
-  };
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [triggerIndex, setTriggerIndex] = useState(-1);
 
+    const availableNodeNames = React.useMemo(() => {
+        return nodes
+            .filter(n => n.id !== id)
+            .map(n => n.data?.customName || n.id);
+    }, [nodes, id]);
 
-  const themeMap = {
-    primary: {
-      bg: 'bg-primary/20',
-      text: 'text-primary',
-      border: 'border-primary/30',
-      shadow: 'shadow-[0_0_10px_rgba(139,92,246,0.3)]',
-      gradient: 'from-primary/10',
-    },
-    violet: {
-      bg: 'bg-violet-500/20',
-      text: 'text-violet-400',
-      border: 'border-violet-500/30',
-      shadow: 'shadow-[0_0_10px_rgba(139,92,246,0.3)]',
-      gradient: 'from-violet-500/10',
-    },
-    emerald: {
-      bg: 'bg-emerald-500/20',
-      text: 'text-emerald-400',
-      border: 'border-emerald-500/30',
-      shadow: 'shadow-[0_0_10px_rgba(52,211,153,0.3)]',
-      gradient: 'from-emerald-500/10',
-    },
-    sky: {
-      bg: 'bg-sky-400/20',
-      text: 'text-sky-400',
-      border: 'border-sky-400/30',
-      shadow: 'shadow-[0_0_10px_rgba(56,189,248,0.3)]',
-      gradient: 'from-sky-400/10',
-    },
-    amber: {
-      bg: 'bg-amber-400/20',
-      text: 'text-amber-400',
-      border: 'border-amber-400/30',
-      shadow: 'shadow-[0_0_10px_rgba(251,191,36,0.3)]',
-      gradient: 'from-amber-400/10',
-    },
-    rose: {
-      bg: 'bg-rose-400/20',
-      text: 'text-rose-400',
-      border: 'border-rose-400/30',
-      shadow: 'shadow-[0_0_10px_rgba(251,113,133,0.3)]',
-      gradient: 'from-rose-400/10',
-    },
-    indigo: {
-      bg: 'bg-indigo-400/20',
-      text: 'text-indigo-400',
-      border: 'border-indigo-400/30',
-      shadow: 'shadow-[0_0_10px_rgba(129,140,248,0.3)]',
-      gradient: 'from-indigo-400/10',
-    },
-    cyan: {
-      bg: 'bg-cyan-400/20',
-      text: 'text-cyan-400',
-      border: 'border-cyan-400/30',
-      shadow: 'shadow-[0_0_10px_rgba(34,211,238,0.3)]',
-      gradient: 'from-cyan-400/10',
-    },
-    orange: {
-      bg: 'bg-orange-400/20',
-      text: 'text-orange-400',
-      border: 'border-orange-400/30',
-      shadow: 'shadow-[0_0_10px_rgba(251,146,60,0.3)]',
-      gradient: 'from-orange-400/10',
-    },
-    fuchsia: {
-      bg: 'bg-fuchsia-400/20',
-      text: 'text-fuchsia-400',
-      border: 'border-fuchsia-400/30',
-      shadow: 'shadow-[0_0_10px_rgba(232,121,249,0.3)]',
-      gradient: 'from-fuchsia-400/10',
-    },
-    lime: {
-      bg: 'bg-lime-400/20',
-      text: 'text-lime-400',
-      border: 'border-lime-400/30',
-      shadow: 'shadow-[0_0_10px_rgba(163,230,53,0.3)]',
-      gradient: 'from-lime-400/10',
-    }
-  };
+    const handleFieldChange = (key, value) => {
+        updateNodeField(id, key, value);
 
+        if (config.type === 'text' && key === 'text') {
+            const varRegex = /\{\{\s*([a-zA-Z0-9_$-]+)\s*\}\}/g;
+            const matches = [...value.matchAll(varRegex)];
+            const uniqueVars = [...new Set(matches.map(m => m[1]))];
+            setVariables(uniqueVars);
 
-  const theme = themeMap[themeColor] || themeMap.primary;
+            // Suggestion Logic
+            const cursor = textareaRef.current.selectionStart;
+            const textBefore = value.slice(0, cursor);
+            const lastTrigger = textBefore.lastIndexOf('{{');
 
-  const styleProp = { width: `${width}px` };
-  if (height) styleProp.height = `${height}px`;
+            if (lastTrigger !== -1) {
+                const query = textBefore.slice(lastTrigger + 2);
+                if (!query.includes('}')) {
+                    setTriggerIndex(lastTrigger);
+                    const filtered = availableNodeNames.filter(name =>
+                        name.toLowerCase().includes(query.toLowerCase())
+                    );
+                    setSuggestions(filtered);
+                    setShowSuggestions(true);
+                } else {
+                    setShowSuggestions(false);
+                }
+            } else {
+                setShowSuggestions(false);
+            }
+        }
+    };
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-      className={`rounded-2xl bg-[#0d1117]/60 backdrop-blur-xl border ${error ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-slate-800/50 shadow-2xl'} transition-all duration-300 hover:border-primary/40 group relative`}
-      style={styleProp}
+    const applySuggestion = (suggestion) => {
+        const text = data.text || '';
+        const before = text.slice(0, triggerIndex + 2);
+        const after = text.slice(textareaRef.current.selectionStart);
+        const newValue = `${before}${suggestion} }} ${after}`;
 
-    >
-      {/* Background Image Overlay */}
-      <div className="absolute inset-0 opacity-40 pointer-events-none">
-        <img
-          src="/purple_bg.webp"
-          alt=""
-          className="w-full h-full object-cover mix-blend-overlay object-right"
-        />
-      </div>
+        handleFieldChange('text', newValue);
+        setShowSuggestions(false);
 
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-2xl overflow-hidden">
-        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1.5px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-      </div>
+        setTimeout(() => {
+            textareaRef.current.focus();
+            const newCursor = before.length + suggestion.length + 4;
+            textareaRef.current.setSelectionRange(newCursor, newCursor);
+        }, 0);
+    };
 
-      {handles.map((handle, idx) => {
-        const posClass = handle.position === Position.Left ? '!left-[-8px]' : '!right-[-8px]';
+    useEffect(() => {
+        if (config.type === 'text') {
+            updateNodeInternals(id);
+        }
+    }, [variables, id, updateNodeInternals, config.type]);
 
-        return (
-          <div
-            key={`${handle.id || idx}`}
-            className={`absolute ${posClass}  z-20`}
-            style={{ top: handle.style?.top || '50%', transform: 'translateY(-50%)' }}
-          >
-            <span className={`animate-ping absolute inline-flex -top-2.5 -right-0.5 min-w-5 min-h-5 rounded-full bg-white opacity-40`} />
-            <Handle
-              type={handle.type}
-              position={handle.position}
-              id={handle.id}
-              className={`!static  !min-w-4 !min-h-4 !rounded-full !bg-white !border-[1.5px] !border-[#0d1117] !transition-all hover:!scale-150 z-20 ${handle.className || ''}`}
-              style={handle.style}
-            />
-          </div>
-        );
-      })}
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+        }
+    }, [data?.text]);
 
-      <div className="px-4 py-3 bg-slate-900/40 border-b border-slate-800 flex items-center justify-between relative z-10">
-        <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
-        <div className="flex items-center gap-3 relative z-10">
-          <div className={`flex items-center justify-center w-6 h-6 rounded-md ${theme.bg} ${theme.text} border ${theme.border} ${theme.shadow}`}>
-            {Icon && <Icon className="w-4 h-4" />}
-          </div>
-          <span className="text-slate-200 font-semibold text-sm tracking-widest uppercase">{title}</span>
-        </div>
-        <Button
-          onClick={() => removeNode(id)}
-          variant="dangerIcon"
-          className="relative z-10"
-          title="Delete Node"
+    const themeMap = {
+        primary: { bg: 'bg-primary/20', text: 'text-primary', border: 'border-primary/30', shadow: 'shadow-[0_0_10px_rgba(139,92,246,0.3)]', gradient: 'from-primary/10' },
+        violet: { bg: 'bg-violet-500/20', text: 'text-violet-400', border: 'border-violet-500/30', shadow: 'shadow-[0_0_10px_rgba(139,92,246,0.3)]', gradient: 'from-violet-500/10' },
+        emerald: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/30', shadow: 'shadow-[0_0_10px_rgba(52,211,153,0.3)]', gradient: 'from-emerald-500/10' },
+        sky: { bg: 'bg-sky-400/20', text: 'text-sky-400', border: 'border-sky-400/30', shadow: 'shadow-[0_0_10px_rgba(56,189,248,0.3)]', gradient: 'from-sky-400/10' },
+        amber: { bg: 'bg-amber-400/20', text: 'text-amber-400', border: 'border-amber-400/30', shadow: 'shadow-[0_0_10px_rgba(251,191,36,0.3)]', gradient: 'from-amber-400/10' },
+        rose: { bg: 'bg-rose-400/20', text: 'text-rose-400', border: 'border-rose-400/30', shadow: 'shadow-[0_0_10px_rgba(251,113,133,0.3)]', gradient: 'from-rose-400/10' },
+        indigo: { bg: 'bg-indigo-400/20', text: 'text-indigo-400', border: 'border-indigo-400/30', shadow: 'shadow-[0_0_10px_rgba(129,140,248,0.3)]', gradient: 'from-indigo-400/10' },
+        cyan: { bg: 'bg-cyan-400/20', text: 'text-cyan-400', border: 'border-cyan-400/30', shadow: 'shadow-[0_0_10px_rgba(34,211,238,0.3)]', gradient: 'from-cyan-400/10' },
+        orange: { bg: 'bg-orange-400/20', text: 'text-orange-400', border: 'border-orange-400/30', shadow: 'shadow-[0_0_10px_rgba(251,146,60,0.3)]', gradient: 'from-orange-400/10' },
+        fuchsia: { bg: 'bg-fuchsia-400/20', text: 'text-fuchsia-400', border: 'border-fuchsia-400/30', shadow: 'shadow-[0_0_10px_rgba(232,121,249,0.3)]', gradient: 'from-fuchsia-400/10' },
+        lime: { bg: 'bg-lime-400/20', text: 'text-lime-400', border: 'border-lime-400/30', shadow: 'shadow-[0_0_10px_rgba(163,230,53,0.3)]', gradient: 'from-lime-400/10' }
+    };
+
+    const theme = themeMap[themeColor] || themeMap.primary;
+
+    const renderField = (field) => {
+        const value = data[field.key] ?? field.default;
+
+        switch (field.type) {
+            case 'select':
+                return (
+                    <select
+                        value={value}
+                        onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                        className="w-full bg-[#050505]/50 border border-slate-700/50 text-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary/50 transition-all"
+                    >
+                        {field.options.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                    </select>
+                );
+            case 'textarea':
+                return (
+                    <div className="relative">
+                        <textarea
+                            ref={textareaRef}
+                            value={value}
+                            onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                            placeholder={field.placeholder}
+                            className="w-full bg-[#050505]/40 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-300 focus:outline-none focus:border-violet-500/50 transition-all resize-none overflow-hidden font-mono leading-relaxed min-h-[100px]"
+                        />
+                        {showSuggestions && suggestions.length > 0 && (
+                            <div className="absolute z-[100] left-0 bottom-full mb-2 w-full max-h-40 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-primary/30 rounded-xl shadow-neon-primary p-1 animate-in fade-in zoom-in duration-200">
+                                {suggestions.map(name => (
+                                    <button
+                                        key={name}
+                                        onClick={() => applySuggestion(name)}
+                                        className="w-full text-left px-3 py-2 text-[10px] font-bold text-slate-300 hover:bg-primary/20 hover:text-white rounded-lg transition-colors flex items-center justify-between group"
+                                    >
+                                        <span>{name}</span>
+                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <SparklesIcon className="w-3 h-3 text-primary" />
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                );
+            case 'modelSelect':
+                const models = [
+                    { id: 'gpt-4', name: 'GPT-4', icon: SparklesIcon, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                    { id: 'claude-3', name: 'Claude 3', icon: FireIcon, color: 'text-orange-400', bg: 'bg-orange-500/10' },
+                    { id: 'gemini-pro', name: 'Gemini Pro', icon: BeakerIcon, color: 'text-sky-400', bg: 'bg-sky-500/10' },
+                    { id: 'llama-3', name: 'Llama 3', icon: BoltIcon, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+                ];
+                return (
+                    <div className="grid grid-cols-2 gap-3">
+                        {models.map((model) => {
+                            const MIcon = model.icon;
+                            const isSelected = value === model.id;
+                            return (
+                                <button
+                                    key={model.id}
+                                    onClick={() => handleFieldChange(field.key, model.id)}
+                                    className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all duration-300 ${isSelected
+                                            ? `border-primary bg-primary/20 shadow-[0_0_15px_rgba(139,92,246,0.2)] scale-[1.02]`
+                                            : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-800/60'
+                                        }`}
+                                >
+                                    <div className={`p-2 rounded-lg ${model.bg} ${model.color}`}>
+                                        <MIcon className="w-5 h-5" />
+                                    </div>
+                                    <span className={`text-[10px] font-bold ${isSelected ? 'text-white' : 'text-slate-400'}`}>
+                                        {model.name}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                );
+            case 'number':
+                return (
+                    <input
+                        type="number"
+                        value={value}
+                        onChange={(e) => handleFieldChange(field.key, Number(e.target.value))}
+                        className="w-full bg-[#050505]/50 border border-slate-700/50 text-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary/50 transition-all font-mono"
+                    />
+                );
+            case 'text':
+            default:
+                return (
+                    <input
+                        type="text"
+                        value={value}
+                        onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                        className="w-full bg-[#050505]/50 border border-slate-700/50 text-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary/50 transition-all font-mono"
+                    />
+                );
+        }
+    };
+
+    const allInputs = [
+        ...inputs,
+        ...(config.type === 'text' ? variables.map((v, i) => ({
+            id: `${id}-${v}`,
+            style: { top: `${(i + 1) * (100 / (variables.length + 1))}%` },
+            className: '!bg-primary'
+        })) : [])
+    ];
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className={`rounded-2xl bg-[#0d1117]/60 backdrop-blur-xl border ${error ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-slate-800/50 shadow-2xl'} transition-all duration-300 hover:border-primary/40 group relative`}
+            style={{ width: `${width}px` }}
         >
-          <XMarkIcon className="w-4 h-4" />
-        </Button>
-      </div>
+            {/* Background Decorations */}
+            <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden rounded-2xl">
+                <img src="/purple_bg.webp" alt="" className="w-full h-full object-cover mix-blend-overlay object-right" />
+            </div>
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-2xl overflow-hidden">
+                <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1.5px, transparent 0)', backgroundSize: '24px 24px' }} />
+            </div>
 
-      <div className="p-4 flex flex-col gap-4 relative z-10">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Node Name</label>
-            {error && <span className="text-[8px] font-bold text-rose-400 uppercase animate-pulse">{error}</span>}
-          </div>
-          <input
-            type="text"
-            value={localName}
-            onChange={handleNameChange}
-            className={`w-full bg-[#050505]/50 border ${error ? 'border-rose-500/50 text-rose-200' : 'border-slate-700/50 text-slate-200'} rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 transition-all font-mono`}
-            placeholder="Unique identifier..."
-          />
-        </div>
-        <div className="h-px bg-slate-800/50 w-full" />
-        {children}
-      </div>
+            {/* Target Handles (Left) */}
+            {allInputs.map((h, idx) => (
+                <div key={h.id} className="absolute !left-[-8px] z-20" style={{ top: h.style?.top || '50%', transform: 'translateY(-50%)' }}>
+                    <span className="animate-ping absolute inline-flex -top-2.5 -right-0.5 min-w-5 min-h-5 rounded-full bg-white opacity-40" />
+                    <Handle
+                        type="target"
+                        position={Position.Left}
+                        id={h.id}
+                        className={`!static !min-w-4 !min-h-4 !rounded-full !bg-white !border-[1.5px] !border-[#0d1117] !transition-all hover:!scale-150 z-20 ${h.className || ''}`}
+                    />
+                </div>
+            ))}
 
-    </motion.div>
-  );
+            {/* Source Handles (Right) */}
+            {outputs.map((h, idx) => (
+                <div key={h.id} className="absolute !right-[-8px] z-20" style={{ top: h.style?.top || '50%', transform: 'translateY(-50%)' }}>
+                    <span className="animate-ping absolute inline-flex -top-2.5 -right-0.5 min-w-5 min-h-5 rounded-full bg-white opacity-40" />
+                    <Handle
+                        type="source"
+                        position={Position.Right}
+                        id={h.id}
+                        className={`!static !min-w-4 !min-h-4 !rounded-full !bg-white !border-[1.5px] !border-[#0d1117] !transition-all hover:!scale-150 z-20 ${h.className || ''}`}
+                    />
+                </div>
+            ))}
+
+            {/* Header */}
+            <div className="px-4 py-3 bg-slate-900/40 border-b border-slate-800 flex items-center justify-between relative z-10">
+                <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <div className="flex items-center gap-3 relative z-10">
+                    <div className={`flex items-center justify-center w-6 h-6 rounded-md ${theme.bg} ${theme.text} border ${theme.border} ${theme.shadow}`}>
+                        {Icon && <Icon className="w-4 h-4" />}
+                    </div>
+                    <span className="text-slate-200 font-semibold text-sm tracking-widest uppercase">{title}</span>
+                </div>
+                <Button onClick={() => removeNode(id)} variant="dangerIcon" className="relative z-10">
+                    <XMarkIcon className="w-4 h-4" />
+                </Button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 flex flex-col gap-4 relative z-10">
+                {/* Node Name Field (Always Present) */}
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Node Name</label>
+                        {error && <span className="text-[8px] font-bold text-rose-400 uppercase animate-pulse">{error}</span>}
+                    </div>
+                    <input
+                        type="text"
+                        value={localName}
+                        onChange={handleNameChange}
+                        className={`w-full bg-[#050505]/50 border ${error ? 'border-rose-500/50 text-rose-200' : 'border-slate-700/50 text-slate-200'} rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 transition-all font-mono`}
+                    />
+                </div>
+
+                <div className="h-px bg-slate-800/50 w-full" />
+
+                {/* Dynamic Fields */}
+                {fields.map(field => (
+                    <div key={field.key} className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{field.label}</label>
+                        {renderField(field)}
+                    </div>
+                ))}
+            </div>
+        </motion.div>
+    );
 };

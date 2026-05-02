@@ -14,18 +14,52 @@
   }
 }
 
+/* Modern Custom Scrollbar Utilities */
 @layer utilities {
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
+    height: 5px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    background: transparent;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-slate-800 rounded-full hover:bg-violet-500/50 transition-colors;
+    background: rgba(139, 92, 246, 0.2);
+    border-radius: 10px;
+    transition: background 0.3s ease;
   }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.5);
+  }
+
+  /* Firefox Support */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.2) transparent;
+  }
+}
+
+/* Global Modern Scrollbar (Optional but recommended for consistency) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 10px;
+  border: 1px solid #020617;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8b5cf6;
 }
 
 /* ReactFlow Internal Overrides */
