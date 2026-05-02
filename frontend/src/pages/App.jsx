@@ -40,18 +40,18 @@ function App() {
     if (modalMode === 'create') {
       const hasExistingContent = nodes.length > 0;
       const prevName = currentProjectName === 'Untitled Pipeline' ? 'Previous Pipeline' : currentProjectName;
-      
+
       // 1. Save current state to history before clearing
       if (hasExistingContent) {
         saveToHistory(null, { nodes: nodes.length, edges: edges.length });
       }
-      
+
       // 2. Reset workspace
       clearCanvas();
-      
+
       // 3. Set the new name
       setCurrentProjectName(name);
-      
+
       toast.success((t) => (
         <div className="flex flex-col gap-1">
           {hasExistingContent && (
@@ -69,7 +69,7 @@ function App() {
       setCurrentProjectName(name);
       toast.success(`Pipeline renamed to "${name}"`, { icon: '📝' });
     }
-    
+
     setIsNamingModalOpen(false);
   };
 
@@ -104,8 +104,8 @@ function App() {
 
 
 
-          <ProjectHeader 
-            onNewProject={handleCreateNew} 
+          <ProjectHeader
+            onNewProject={handleCreateNew}
             onRename={handleRename}
           />
 
@@ -124,9 +124,9 @@ function App() {
           </div>
 
           <SavedFlows isOpen={isSavedFlowsOpen} onClose={() => setIsSavedFlowsOpen(false)} />
-          <PipelineNamingModal 
-            isOpen={isNamingModalOpen} 
-            onClose={() => setIsNamingModalOpen(false)} 
+          <PipelineNamingModal
+            isOpen={isNamingModalOpen}
+            onClose={() => setIsNamingModalOpen(false)}
             onConfirm={handleNameConfirm}
             initialValue={modalMode === 'rename' ? currentProjectName : ''}
           />
