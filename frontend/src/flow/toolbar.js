@@ -16,7 +16,7 @@ import { FlowStats } from './FlowStats';
 import { useState } from 'react';
 import { DraggableNode } from './draggableNode';
 import { useReactFlow } from 'reactflow';
-import { useStore } from './store';
+import { useStore } from '../store/store';
 
 
 export const PipelineToolbar = () => {
@@ -27,7 +27,7 @@ export const PipelineToolbar = () => {
 
     const onNodeClick = (type) => {
         const { x, y, zoom } = getViewport();
-        
+
         // Calculate center of the viewport
         const center = {
             x: -x / zoom + (window.innerWidth > 768 ? (window.innerWidth - 320) : window.innerWidth) / (2 * zoom),
@@ -43,7 +43,7 @@ export const PipelineToolbar = () => {
         };
 
         addNode(newNode);
-        
+
         // On mobile, close the drawer after adding
         if (window.innerWidth < 768) {
             setIsOpen(false);

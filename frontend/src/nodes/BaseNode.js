@@ -1,16 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Handle, Position, useUpdateNodeInternals } from 'reactflow';
 import { XMarkIcon, SparklesIcon, FireIcon, BeakerIcon, BoltIcon } from '@heroicons/react/24/outline';
-import { useStore } from '../store';
-import { Button } from '../Button';
+import { useStore } from '../store/store';
+import { shallow } from 'zustand/shallow';
+import { Button } from '../components/Button';
 import { motion } from 'framer-motion';
+import { NODE_CONFIGS } from './nodeRegistry';
+import { VARIABLE_PATTERN, SPACE_PATTERN } from '../utils/regex';
 
 export const BaseNode = ({ id, config, data }) => {
     const { title, icon: Icon, themeColor = 'primary', inputs = [], outputs = [], fields = [], width = 250 } = config;
 
-    const removeNode = useStore(state => state.removeNode);
-    const nodes = useStore(state => state.nodes);
-    const updateNodeField = useStore(state => state.updateNodeField);
+    const { updateNodeField, nodes, removeNode, renameNodeReferences } = useStore(
+        state => ({
+            updateNodeField: state.updateNodeField,
+            nodes: state.nodes,
+            removeNode: state.removeNode,
+            renameNodeReferences: state.renameNodeReferences
+        }),
+        shallow
+    );
     const updateNodeInternals = useUpdateNodeInternals();
 
     const currentNode = nodes.find(n => n.id === id);
@@ -23,14 +32,23 @@ export const BaseNode = ({ id, config, data }) => {
     const [variables, setVariables] = useState([]);
     const textareaRef = useRef(null);
 
+    const lastValidName = useRef(currentCustomName);
+
     const handleNameChange = (e) => {
-        const newName = e.target.value;
+        // Prevent spaces in node names using centralized regex
+        const newName = e.target.value.replace(SPACE_PATTERN, '');
         setLocalName(newName);
         const isDuplicate = nodes.some(n => n.id !== id && (n.data?.customName === newName || n.id === newName));
+
         if (isDuplicate) {
             setError('Name taken');
         } else {
             setError('');
+            // Trigger global refactor if we have a valid new name and a previous valid name to replace
+            if (newName.trim() !== '' && lastValidName.current !== newName) {
+                renameNodeReferences(lastValidName.current, newName);
+                lastValidName.current = newName; // Update our source of truth for the next rename
+            }
             updateNodeField(id, 'customName', newName);
         }
     };
@@ -41,16 +59,15 @@ export const BaseNode = ({ id, config, data }) => {
 
     const availableNodeNames = React.useMemo(() => {
         return nodes
-            .filter(n => n.id !== id)
+            .filter(n => n.id !== id && !variables.includes(n.data?.customName || n.id))
             .map(n => n.data?.customName || n.id);
-    }, [nodes, id]);
+    }, [nodes, id, variables]);
 
     const handleFieldChange = (key, value) => {
         updateNodeField(id, key, value);
 
         if (config.type === 'text' && key === 'text') {
-            const varRegex = /\{\{\s*([a-zA-Z0-9_$-]+)\s*\}\}/g;
-            const matches = [...value.matchAll(varRegex)];
+            const matches = [...value.matchAll(VARIABLE_PATTERN)];
             const uniqueVars = [...new Set(matches.map(m => m[1]))];
             setVariables(uniqueVars);
 
@@ -81,7 +98,7 @@ export const BaseNode = ({ id, config, data }) => {
         const text = data.text || '';
         const before = text.slice(0, triggerIndex + 2);
         const after = text.slice(textareaRef.current.selectionStart);
-        const newValue = `${before}${suggestion} }} ${after}`;
+        const newValue = `${before}${suggestion}}}${after}`;
 
         handleFieldChange('text', newValue);
         setShowSuggestions(false);
@@ -105,6 +122,14 @@ export const BaseNode = ({ id, config, data }) => {
             textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
         }
     }, [data?.text]);
+
+    useEffect(() => {
+        if (config.type === 'text' && data.text) {
+            const matches = [...data.text.matchAll(VARIABLE_PATTERN)];
+            const uniqueVars = [...new Set(matches.map(m => m[1]))];
+            setVariables(uniqueVars);
+        }
+    }, [data.text, config.type]);
 
     const themeMap = {
         primary: { bg: 'bg-primary/20', text: 'text-primary', border: 'border-primary/30', shadow: 'shadow-[0_0_10px_rgba(139,92,246,0.3)]', gradient: 'from-primary/10' },
@@ -140,27 +165,63 @@ export const BaseNode = ({ id, config, data }) => {
                 );
             case 'textarea':
                 return (
-                    <div className="relative">
-                        <textarea
-                            ref={textareaRef}
-                            value={value}
-                            onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                            placeholder={field.placeholder}
-                            className="w-full bg-[#050505]/40 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-300 focus:outline-none focus:border-violet-500/50 transition-all resize-none overflow-hidden font-mono leading-relaxed min-h-[100px]"
-                        />
-                        {showSuggestions && suggestions.length > 0 && (
-                            <div className="absolute z-[100] left-0 bottom-full mb-2 w-full max-h-40 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-primary/30 rounded-xl shadow-neon-primary p-1 animate-in fade-in zoom-in duration-200">
-                                {suggestions.map(name => (
-                                    <button
-                                        key={name}
-                                        onClick={() => applySuggestion(name)}
-                                        className="w-full text-left px-3 py-2 text-[10px] font-bold text-slate-300 hover:bg-primary/20 hover:text-white rounded-lg transition-colors flex items-center justify-between group"
+                    <div className="relative flex flex-col gap-3">
+                        <div className="relative">
+                            <textarea
+                                ref={textareaRef}
+                                value={value}
+                                onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                                placeholder={field.placeholder}
+                                className="w-full bg-[#050505]/40 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-300 focus:outline-none focus:border-violet-500/50 transition-all resize-none overflow-hidden font-mono leading-relaxed min-h-[100px]"
+                            />
+                            {showSuggestions && suggestions.length > 0 && (
+                                <div className="absolute z-[100] left-0 bottom-full mb-2 w-full max-h-40 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-primary/30 rounded-xl shadow-neon-primary p-1 animate-in fade-in zoom-in duration-200">
+                                    {suggestions.map(name => {
+                                        const sourceNode = nodes.find(n => (n.data?.customName || n.id) === name);
+                                        const config = NODE_CONFIGS[sourceNode?.type] || {};
+                                        const SuggestionIcon = config.icon || SparklesIcon;
+                                        const colorClass = themeMap[config.themeColor]?.text || 'text-primary';
+
+                                        return (
+                                            <button
+                                                key={name}
+                                                onClick={() => applySuggestion(name)}
+                                                className="w-full text-left px-3 py-2 text-[10px] font-bold text-slate-300 hover:bg-primary/20 hover:text-white rounded-lg transition-colors flex items-center justify-between group"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`${colorClass} opacity-70 group-hover:opacity-100 transition-opacity`}>
+                                                        <SuggestionIcon className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <span>{name}</span>
+                                                </div>
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <SparklesIcon className="w-3 h-3 text-primary/50" />
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Variable Badges Display */}
+                        {variables.length > 0 && (
+                            <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-1 duration-300">
+                                {variables.map(v => (
+                                    <div
+                                        key={v}
+                                        className="flex items-center gap-2 px-2.5 py-1.5 bg-violet-500/10 border border-violet-500/30 rounded-xl group hover:border-violet-500/60 transition-all hover:bg-violet-500/20 shadow-sm"
                                     >
-                                        <span>{name}</span>
-                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <SparklesIcon className="w-3 h-3 text-primary" />
-                                        </div>
-                                    </button>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(139,92,246,0.6)]" />
+                                        <span className="text-[10px] font-bold text-slate-200 font-mono tracking-tight">{v}</span>
+                                        <button
+                                            onClick={() => handleFieldChange(field.key, v)}
+                                            className="text-slate-500 hover:text-rose-400 transition-colors ml-0.5"
+                                            title="Remove variable"
+                                        >
+                                            <XMarkIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                                        </button>
+                                    </div>
                                 ))}
                             </div>
                         )}
@@ -183,8 +244,8 @@ export const BaseNode = ({ id, config, data }) => {
                                     key={model.id}
                                     onClick={() => handleFieldChange(field.key, model.id)}
                                     className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all duration-300 ${isSelected
-                                            ? `border-primary bg-primary/20 shadow-[0_0_15px_rgba(139,92,246,0.2)] scale-[1.02]`
-                                            : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-800/60'
+                                        ? `border-primary bg-primary/20 shadow-[0_0_15px_rgba(139,92,246,0.2)] scale-[1.02]`
+                                        : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-800/60'
                                         }`}
                                 >
                                     <div className={`p-2 rounded-lg ${model.bg} ${model.color}`}>
@@ -248,7 +309,7 @@ export const BaseNode = ({ id, config, data }) => {
             {/* Target Handles (Left) */}
             {allInputs.map((h, idx) => (
                 <div key={h.id} className="absolute !left-[-8px] z-20" style={{ top: h.style?.top || '50%', transform: 'translateY(-50%)' }}>
-                    <span className="animate-ping absolute inline-flex -top-2.5 -right-0.5 min-w-5 min-h-5 rounded-full bg-white opacity-40" />
+                    <span className="animate-ping absolute inline-flex -top-2.5 -right-0.5 min-w-5 min-h-5 rounded-full bg-white opacity-20" />
                     <Handle
                         type="target"
                         position={Position.Left}
@@ -261,7 +322,7 @@ export const BaseNode = ({ id, config, data }) => {
             {/* Source Handles (Right) */}
             {outputs.map((h, idx) => (
                 <div key={h.id} className="absolute !right-[-8px] z-20" style={{ top: h.style?.top || '50%', transform: 'translateY(-50%)' }}>
-                    <span className="animate-ping absolute inline-flex -top-2.5 -right-0.5 min-w-5 min-h-5 rounded-full bg-white opacity-40" />
+                    <span className="animate-ping absolute inline-flex -top-2.5 -right-0.5 min-w-5 min-h-5 rounded-full bg-white opacity-20" />
                     <Handle
                         type="source"
                         position={Position.Right}
@@ -280,7 +341,7 @@ export const BaseNode = ({ id, config, data }) => {
                     </div>
                     <span className="text-slate-200 font-semibold text-sm tracking-widest uppercase">{title}</span>
                 </div>
-                <Button onClick={() => removeNode(id)} variant="dangerIcon" className="relative z-10">
+                <Button onClick={() => removeNode(id)} variant="dangerIcon" className="relative z-10" title="Remove this node">
                     <XMarkIcon className="w-4 h-4" />
                 </Button>
             </div>

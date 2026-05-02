@@ -1,31 +1,27 @@
 import { XMarkIcon, ClockIcon, TrashIcon, PlayIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { useStore } from './store';
-import { EmptyState } from './EmptyState';
-import { Button } from './Button';
+import { useStore } from '../store/store';
+import { shallow } from 'zustand/shallow';
+import { useReactFlow } from 'reactflow';
+import { EmptyState } from '../components/EmptyState';
+import { Button } from '../components/Button';
 
 
 
 export const SavedFlows = ({ isOpen, onClose }) => {
-    const [history, setHistory] = useState([]);
-    const setNodes = useStore((state) => state.setNodes);
-    const setEdges = useStore((state) => state.setEdges);
-    const setCurrentFlowId = useStore((state) => state.setCurrentFlowId);
+    const { history, clearHistory, setNodes, setEdges, setCurrentFlowId } = useStore(
+        state => ({
+            history: state.history,
+            clearHistory: state.clearHistory,
+            setNodes: state.setNodes,
+            setEdges: state.setEdges,
+            setCurrentFlowId: state.setCurrentFlowId
+        }),
+        shallow
+    );
 
-
-
-    useEffect(() => {
-        if (isOpen) {
-            const saved = JSON.parse(localStorage.getItem('saved_flows') || '[]');
-            setHistory(saved);
-        }
-    }, [isOpen]);
-
-    const clearHistory = () => {
-        localStorage.removeItem('saved_flows');
-        setHistory([]);
-    };
+    const { fitView } = useReactFlow();
 
     const loadFlow = (item) => {
         if (Array.isArray(item.nodes) && Array.isArray(item.edges)) {
@@ -33,6 +29,10 @@ export const SavedFlows = ({ isOpen, onClose }) => {
             setEdges(item.edges);
             setCurrentFlowId(item.id);
             onClose();
+
+            setTimeout(() => {
+                fitView({ padding: 0.3, duration: 300 });
+            }, 20);
         }
     };
 
@@ -82,7 +82,7 @@ export const SavedFlows = ({ isOpen, onClose }) => {
                                     <p className="text-md text-slate-500">Restore a previously saved pipeline configuration.</p>
                                 </div>
                             </div>
-                            <Button onClick={onClose} variant="dangerIcon">
+                            <Button onClick={onClose} variant="dangerIcon" title="Close Panel">
                                 <XMarkIcon className="w-5 h-5" />
                             </Button>
 
@@ -122,9 +122,9 @@ export const SavedFlows = ({ isOpen, onClose }) => {
                                     </div>
                                 ))
                             ) : (
-                                <EmptyState 
-                                    icon={ClockIcon} 
-                                    title="No History" 
+                                <EmptyState
+                                    icon={ClockIcon}
+                                    title="No History"
                                     message="No recent executions found. Submit a pipeline to save it here."
                                 />
                             )}
@@ -137,6 +137,7 @@ export const SavedFlows = ({ isOpen, onClose }) => {
                                     onClick={clearHistory}
                                     variant="ghost"
                                     className="text-rose-400 hover:text-rose-300 uppercase tracking-widest text-[10px] font-black"
+                                    title="Permanently delete all saved flows"
                                 >
                                     <TrashIcon className="w-4 h-4" />
                                     Clear All Past Executions

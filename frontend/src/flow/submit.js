@@ -1,7 +1,7 @@
-import { useStore } from './store';
+import { useStore } from '../store/store';
 import { shallow } from 'zustand/shallow';
 import { toast } from 'react-hot-toast';
-import { Button } from './Button';
+import { Button } from '../components/Button';
 
 const selector = (state) => ({
     nodes: state.nodes,
@@ -74,35 +74,11 @@ export const SubmitButton = () => {
                 { duration: 5000 }
             );
 
-            // Save to history if valid
-            const history = JSON.parse(localStorage.getItem('saved_flows') || '[]');
-
-            const flowId = currentFlowId || Date.now();
-            if (!currentFlowId) setCurrentFlowId(flowId);
-
-            const newEntry = {
-                id: flowId,
-                timestamp: new Date().toISOString(),
-                nodes: nodes,
-                edges: edges,
-                stats: {
-                    nodes: nodes.length,
-                    edges: edges.length
-                },
-                is_dag: data.is_dag
-            };
-
-            const existingIndex = history.findIndex(item => item.id === flowId);
-            let newHistory;
-            if (existingIndex !== -1) {
-                // Update existing entry and move to top
-                newHistory = [newEntry, ...history.filter(item => item.id !== flowId)];
-            } else {
-                // Add new entry
-                newHistory = [newEntry, ...history];
-            }
-
-            localStorage.setItem('saved_flows', JSON.stringify(newHistory.slice(0, 10)));
+            // Save to history using store action
+            useStore.getState().saveToHistory({
+                nodes: nodes.length,
+                edges: edges.length
+            });
 
 
         } catch (error) {
@@ -115,8 +91,9 @@ export const SubmitButton = () => {
         <Button
             onClick={handleSubmit}
             variant="pill"
+            title="Submit pipeline for analysis"
         >
-            Submit 
+            Submit
         </Button>
     );
 };

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { PipelineToolbar } from './toolbar';
-import { PipelineUI } from './ui';
+import { PipelineToolbar } from '../flow/toolbar';
+import { PipelineUI } from '../flow/ui';
 import { ReactFlowProvider } from 'reactflow';
-import { SubmitButton } from './submit';
+import { SubmitButton } from '../flow/submit';
 import { Toaster } from 'react-hot-toast';
-import { Button } from './Button';
+import { Button } from '../components/Button';
 
-import { SavedFlows } from './SavedFlows';
+import { SavedFlows } from '../flow/SavedFlows';
 import { ClockIcon } from '@heroicons/react/24/outline';
 
 function App() {
@@ -48,6 +48,7 @@ function App() {
               onClick={() => setIsSavedFlowsOpen(true)}
               variant="pill"
               className="group"
+              title="View and restore past pipelines"
             >
               <span>Pipelines</span>
               <ClockIcon className="w-5 h-5 text-primary group-hover:rotate-12 transition-transform" />

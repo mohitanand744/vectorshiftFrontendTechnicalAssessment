@@ -1,4 +1,4 @@
-import { useStore } from './store';
+import { useStore } from '../store/store';
 import { shallow } from 'zustand/shallow';
 import { ChartBarIcon, CubeIcon, ShareIcon } from '@heroicons/react/24/outline';
 
