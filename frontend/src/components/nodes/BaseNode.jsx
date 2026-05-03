@@ -35,6 +35,16 @@ export const BaseNode = ({ id, config, data }) => {
 
     const lastValidName = useRef(currentCustomName);
 
+    // Local state for text area to prevent cursor jumping
+    const [localText, setLocalText] = useState(data.text || '');
+
+    // Sync local text with store data (for reloads or global changes)
+    useEffect(() => {
+        if (data.text !== localText) {
+            setLocalText(data.text || '');
+        }
+    }, [data.text]);
+
     const handleNameChange = (e) => {
         // Prevent spaces in node names using centralized regex
         const newName = e.target.value.replace(SPACE_PATTERN, '');
@@ -72,29 +82,6 @@ export const BaseNode = ({ id, config, data }) => {
             const matches = [...value.matchAll(VARIABLE_PATTERN)];
             const uniqueVars = [...new Set(matches.map(m => m[1]))];
             
-            // MAGIC CONNECTION FOR MANUAL TYPING
-            uniqueVars.forEach(v => {
-                if (!variables.includes(v)) { // Only for NEWLY typed variables
-                    const sourceNode = nodes.find(n => (n.data?.customName || n.id) === v);
-                    if (sourceNode) {
-                        setTimeout(() => {
-                            const targetHandleId = `${id}-${v}`;
-                            const edges = useStore.getState().edges;
-                            const alreadyConnected = edges.some(e => e.source === sourceNode.id && e.target === id && e.targetHandle === targetHandleId);
-                            
-                            if (!alreadyConnected) {
-                                useStore.getState().onConnect({
-                                    source: sourceNode.id,
-                                    target: id,
-                                    sourceHandle: 'output',
-                                    targetHandle: targetHandleId
-                                });
-                            }
-                        }, 150); // Slight delay to let Handle render
-                    }
-                }
-            });
-
             setVariables(uniqueVars);
 
             // Suggestion Logic
@@ -129,20 +116,6 @@ export const BaseNode = ({ id, config, data }) => {
         handleFieldChange('text', newValue);
         setShowSuggestions(false);
 
-        // MAGIC CONNECTION LOGIC
-        const sourceNode = nodes.find(n => (n.data?.customName || n.id) === suggestion);
-        if (sourceNode) {
-            setTimeout(() => {
-                const targetHandleId = `${id}-${suggestion}`;
-                useStore.getState().onConnect({
-                    source: sourceNode.id,
-                    target: id,
-                    sourceHandle: 'output',
-                    targetHandle: targetHandleId
-                });
-            }, 100);
-        }
-
         setTimeout(() => {
             textareaRef.current.focus();
             const newCursor = before.length + suggestion.length + 4;
@@ -150,17 +123,51 @@ export const BaseNode = ({ id, config, data }) => {
         }, 0);
     };
 
+    const nodeIdentity = nodes.map(n => `${n.id}:${n.data?.customName || ''}`).join('|');
+
     useEffect(() => {
         if (config.type === 'text') {
+            const matches = [...(data.text || '').matchAll(VARIABLE_PATTERN)];
+            const uniqueVars = [...new Set(matches.map(m => m[1]))];
+            setVariables(uniqueVars);
+            
             updateNodeInternals(id);
 
-            // Cleanup orphaned edges
+            // AUTO-CONNECTION LOGIC
+            uniqueVars.forEach(v => {
+                const sourceNode = nodes.find(n => (n.data?.customName || n.id) === v);
+                if (sourceNode) {
+                    const sourceConfig = NODE_CONFIGS[sourceNode.type] || {};
+                    const sourceHandle = sourceConfig.outputs?.[0]?.id || 'output';
+                    const targetHandleId = `${id}-${v}`;
+                    
+                    const edges = useStore.getState().edges;
+                    const alreadyConnected = edges.some(e => 
+                        e.source === sourceNode.id && 
+                        e.target === id && 
+                        e.targetHandle === targetHandleId
+                    );
+
+                    if (!alreadyConnected) {
+                        setTimeout(() => {
+                            useStore.getState().onConnect({
+                                source: sourceNode.id,
+                                target: id,
+                                sourceHandle: sourceHandle,
+                                targetHandle: targetHandleId
+                            });
+                        }, 100);
+                    }
+                }
+            });
+
+            // CLEANUP ORPHANED EDGES
             const currentEdges = useStore.getState().edges;
             const orphanedEdges = currentEdges.filter(edge =>
                 edge.target === id &&
                 edge.targetHandle &&
                 edge.targetHandle.startsWith(`${id}-`) &&
-                !variables.some(v => `${id}-${v}` === edge.targetHandle)
+                !uniqueVars.some(v => `${id}-${v}` === edge.targetHandle)
             );
 
             if (orphanedEdges.length > 0) {
@@ -168,26 +175,15 @@ export const BaseNode = ({ id, config, data }) => {
                 onEdgesChange(orphanedEdges.map(edge => ({ id: edge.id, type: 'remove' })));
             }
         }
-    }, [variables, id, updateNodeInternals, config.type]);
+    }, [data.text, nodeIdentity, id, updateNodeInternals, config.type]);
 
     useEffect(() => {
         if (textareaRef.current) {
-            const { selectionStart, selectionEnd } = textareaRef.current;
-
             textareaRef.current.style.height = 'auto';
             textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
-
-            textareaRef.current.setSelectionRange(selectionStart, selectionEnd);
         }
     }, [data?.text]);
 
-    useEffect(() => {
-        if (config.type === 'text' && data.text) {
-            const matches = [...data.text.matchAll(VARIABLE_PATTERN)];
-            const uniqueVars = [...new Set(matches.map(m => m[1]))];
-            setVariables(uniqueVars);
-        }
-    }, [data.text, config.type]);
 
     const themeMap = {
         primary: { bg: 'bg-primary/20', text: 'text-primary', border: 'border-primary/30', shadow: 'shadow-[0_0_10px_rgba(139,92,246,0.3)]', gradient: 'from-primary/10' },
@@ -204,6 +200,25 @@ export const BaseNode = ({ id, config, data }) => {
     };
 
     const theme = themeMap[themeColor] || themeMap.primary;
+
+    const renderHighlightedText = (text) => {
+        if (!text) return null;
+        
+        // Split text by {{variable}} patterns while keeping the delimiters
+        const parts = text.split(/(\{\{\s*[a-zA-Z0-9_$-]+\s*\}\})/g);
+        
+        return parts.map((part, i) => {
+            const isVar = part.match(/^\{\{\s*[a-zA-Z0-9_$-]+\s*\}\}$/);
+            if (isVar) {
+                return (
+                    <span key={i} className="text-violet-400 font-black bg-violet-500/10 rounded px-0.5 border border-violet-500/20 shadow-[0_0_10px_rgba(139,92,246,0.1)]">
+                        {part}
+                    </span>
+                );
+            }
+            return part;
+        });
+    };
 
     const renderField = (field) => {
         const value = data[field.key] ?? field.default;
@@ -225,12 +240,26 @@ export const BaseNode = ({ id, config, data }) => {
                 return (
                     <div className="relative flex flex-col gap-3">
                         <div className="relative">
+                            {/* Syntax Highlighting Overlay (Behind) */}
+                            <div 
+                                aria-hidden="true"
+                                className="absolute inset-0 w-full h-full pointer-events-none px-4 py-3 text-xs font-mono leading-relaxed whitespace-pre-wrap break-words border border-transparent select-none overflow-hidden text-slate-300"
+                            >
+                                {renderHighlightedText(localText)}
+                                {/* Invisible char at end to fix line-break alignment */}
+                                <span className="h-full invisible">{" "}</span>
+                            </div>
+
                             <textarea
                                 ref={textareaRef}
-                                value={value}
-                                onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                                value={localText}
+                                onChange={(e) => {
+                                    setLocalText(e.target.value);
+                                    handleFieldChange(field.key, e.target.value);
+                                }}
                                 placeholder={field.placeholder}
-                                className="w-full bg-[#050505]/40 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-300 focus:outline-none focus:border-violet-500/50 transition-all resize-none overflow-hidden font-mono leading-relaxed min-h-[100px]"
+                                className="w-full bg-transparent border border-slate-800 rounded-xl px-4 py-3 text-xs text-transparent caret-slate-200 focus:outline-none focus:border-violet-500/50 transition-all resize-none overflow-hidden font-mono leading-relaxed min-h-[100px] relative z-[1]"
+                                spellCheck={false}
                             />
                             {showSuggestions && suggestions.length > 0 && (
                                 <div className="absolute z-[100] left-0 bottom-full mb-2 w-full max-h-40 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-primary/30 rounded-xl shadow-neon-primary p-1 animate-in fade-in zoom-in duration-200">
@@ -264,7 +293,9 @@ export const BaseNode = ({ id, config, data }) => {
 
                         {/* Variable Badges Display */}
                         {variables.length > 0 && (
-                            <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-1 duration-300">
+                            <div className="">
+                                <h2 className="text-xs font-semibold text-slate-400 mb-2">Variables</h2>
+                                <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-1 duration-300">
                                 {variables.map(v => (
                                     <div
                                         key={v}
@@ -281,6 +312,7 @@ export const BaseNode = ({ id, config, data }) => {
                                         </button>
                                     </div>
                                 ))}
+                            </div>
                             </div>
                         )}
                     </div>

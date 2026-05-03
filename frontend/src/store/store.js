@@ -43,6 +43,12 @@ export const useStore = create(
             },
 
             removeNode: (id) => {
+                const nodeToRemove = get().nodes.find(n => n.id === id);
+                const variableName = nodeToRemove?.data?.customName || id;
+                
+                // Clean up variable references first
+                get().removeVariableReferences(variableName);
+
                 set({
                     nodes: get().nodes.filter((node) => node.id !== id),
                     edges: get().edges.filter((edge) => edge.source !== id && edge.target !== id),
@@ -117,6 +123,28 @@ export const useStore = create(
                 set({ 
                     history: newHistory.slice(0, 10),
                     currentFlowId: flowId 
+                });
+            },
+
+            removeVariableReferences: (variableName) => {
+                set({
+                    nodes: get().nodes.map((node) => {
+                        const newData = { ...node.data };
+                        let hasChanged = false;
+
+                        Object.keys(newData).forEach((key) => {
+                            if (typeof newData[key] === 'string' && newData[key].includes(`{{${variableName}}}`)) {
+                                // Remove the variable reference. 
+                                newData[key] = newData[key].replace(`{{${variableName}}}`, '').replace(/\s\s+/g, ' ').trim();
+                                hasChanged = true;
+                            }
+                        });
+
+                        if (hasChanged) {
+                            return { ...node, data: newData };
+                        }
+                        return node;
+                    }),
                 });
             },
 

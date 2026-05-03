@@ -27,6 +27,7 @@ export const Input = React.forwardRef(({
                 
                 <input
                     ref={ref}
+                    spellCheck={false}
                     className={`
                         w-full bg-black/40 border rounded-2xl px-5 py-3 text-white placeholder-slate-600 
                         focus:outline-none focus:ring-4 transition-all duration-300
