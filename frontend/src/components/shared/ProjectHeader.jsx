@@ -19,27 +19,27 @@ export const ProjectHeader = ({ onNewProject, onRename }) => {
     };
 
     return (
-        <div className="absolute top-28 xl:top-8 left-0 xl:left-8 z-[10] flex items-center gap-4 px-6 py-3 bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl">
-            <div className="flex items-center gap-3">
+        <div className="absolute top-20 xl:top-8 left-0 sm:left-4 md:left-8 z-[50] flex items-center w-full sm:w-auto gap-2 md:gap-4 px-3 md:px-6 py-2 md:py-3 bg-slate-950/80 backdrop-blur-2xl border border-slate-800/50 rounded-2xl md:rounded-3xl shadow-2xl animate-in fade-in slide-in-from-left-4 duration-500">
+            <div className="flex items-center gap-2 md:gap-3"> 
                 <div className="flex flex-col items-start">
-                    <span className="xl:text-[13px] text-[10px] font-black text-violet-400 uppercase tracking-[0.2em] leading-none mb-1.5">Active Pipeline</span>
+                    <span className="hidden md:block text-[10px] font-black text-violet-400 uppercase tracking-[0.2em] leading-none mb-1.5">Active Pipeline</span>
                     <div className="flex items-center gap-2 group cursor-pointer" onClick={onRename}>
-                        <h2 className="xl:text-lg text-sm font-bold text-white tracking-tight leading-none">{currentProjectName}</h2>
-                        <PencilSquareIcon className="xl:w-4 xl:h-4 w-5 h-5 text-slate-500 group-hover:text-violet-400 transition-colors" />
+                        <h2 className="text-sm md:text-lg font-bold text-white tracking-tight leading-none truncate min-w-[100px] md:max-w-[150px] md:max-w-none">{currentProjectName}</h2>
+                        <PencilSquareIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-500 group-hover:text-violet-400 transition-colors" />
                     </div>
                 </div>
             </div>
 
-            <div className="w-px h-8 bg-slate-800 mx-2" />
+            <div className="w-px h-6 md:h-8 bg-slate-800 mx-1 md:mx-2" />
 
             <Button
                 onClick={handleNewClick}
                 variant="ghost"
-                className="!px-4 !py-2 !rounded-2xl hover:bg-violet-500/10 hover:text-violet-400 transition-all gap-2"
+                className="!px-3 md:!px-4 !py-1.5 md:!py-2 !rounded-xl md:!rounded-2xl hover:bg-violet-500/10 hover:text-violet-400 transition-all gap-1.5 md:gap-2"
                 title="Create a fresh pipeline"
             >
-                <PlusIcon className="xl:w-5 xl:h-5 w-4 h-4" />
-                <span className="xl:text-sm text-xs font-bold">New Pipeline</span>
+                <PlusIcon className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden sm:block text-xs md:text-sm font-bold">New</span>
             </Button>
         </div>
     );

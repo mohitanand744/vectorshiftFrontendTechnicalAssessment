@@ -7,7 +7,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
 
 import { SavedFlows } from '../components/shared/SavedFlows';
-import { ClockIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { ProjectHeader } from '../components/shared/ProjectHeader';
 import { PipelineNamingModal } from '../components/shared/PipelineNamingModal';
 import { useStore } from '../store/store';
@@ -110,7 +110,7 @@ function App() {
             onRename={handleRename}
           />
 
-          <div className="absolute top-8 right-8 z-10 flex items-center gap-4">
+          <div className="absolute top-4 md:top-8 right-4 md:right-8 z-[50] flex items-center gap-2 md:gap-4">
             {nodes.length > 0 && (
               <Button
                 onClick={() => {
@@ -118,20 +118,21 @@ function App() {
                   toast.success('Canvas cleared', { icon: '🧹' });
                 }}
                 variant="dangerPill"
-                title="Clear all nodes and edges from the canvas"
-                className="animate-in fade-in slide-in-from-right-4 duration-300"
+                title="Clear all nodes and edges"
+                className="!px-3 md:!px-8 !py-2 md:!py-3 !rounded-xl md:!rounded-full animate-in fade-in slide-in-from-right-4 duration-300 group"
               >
-                Clear
+                <span className="hidden md:block">Clear</span>
+                <TrashIcon className="w-5 h-5 md:hidden group-hover:scale-110 transition-transform" />
               </Button>
             )}
 
             <Button
               onClick={() => setIsSavedFlowsOpen(true)}
               variant="pill"
-              className="group"
+              className="!px-3 md:!px-8 !py-2 md:!py-3 !rounded-xl md:!rounded-full group"
               title="View and restore past pipelines"
             >
-              <span>Pipelines</span>
+              <span className="hidden md:block text-xs xl:text-sm">Pipelines</span>
               <ClockIcon className="w-5 h-5 text-primary group-hover:rotate-12 transition-transform" />
             </Button>
 
