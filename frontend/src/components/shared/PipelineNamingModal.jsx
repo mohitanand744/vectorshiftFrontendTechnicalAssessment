@@ -17,7 +17,6 @@ export const PipelineNamingModal = ({ isOpen, onClose, onConfirm, initialValue =
         }
     });
 
-    // Reset form when modal closes or opens with initial value
     useEffect(() => {
         if (isOpen) {
             reset({ name: initialValue });

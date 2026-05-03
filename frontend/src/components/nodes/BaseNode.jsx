@@ -29,16 +29,13 @@ export const BaseNode = ({ id, config, data }) => {
     const [localName, setLocalName] = useState(currentCustomName);
     const [error, setError] = useState('');
 
-    // For TextNode dynamic handles
     const [variables, setVariables] = useState([]);
     const textareaRef = useRef(null);
 
     const lastValidName = useRef(currentCustomName);
 
-    // Local state for text area to prevent cursor jumping
     const [localText, setLocalText] = useState(data.text || '');
 
-    // Sync local text with store data (for reloads or global changes)
     useEffect(() => {
         if (data.text !== localText) {
             setLocalText(data.text || '');
@@ -46,7 +43,6 @@ export const BaseNode = ({ id, config, data }) => {
     }, [data.text]);
 
     const handleNameChange = (e) => {
-        // Prevent spaces in node names using centralized regex
         const newName = e.target.value.replace(SPACE_PATTERN, '');
         setLocalName(newName);
         const isDuplicate = nodes.some(n => n.id !== id && (n.data?.customName === newName || n.id === newName));
@@ -55,10 +51,9 @@ export const BaseNode = ({ id, config, data }) => {
             setError('Name taken');
         } else {
             setError('');
-            // Trigger global refactor if we have a valid new name and a previous valid name to replace
             if (newName.trim() !== '' && lastValidName.current !== newName) {
                 renameNodeReferences(lastValidName.current, newName);
-                lastValidName.current = newName; // Update our source of truth for the next rename
+                lastValidName.current = newName;
             }
             updateNodeField(id, 'customName', newName);
         }
@@ -77,14 +72,12 @@ export const BaseNode = ({ id, config, data }) => {
     const handleFieldChange = (key, value) => {
         updateNodeField(id, key, value);
 
-
         if (config.type === 'text' && key === 'text') {
             const matches = [...value.matchAll(VARIABLE_PATTERN)];
             const uniqueVars = [...new Set(matches.map(m => m[1]))];
             
             setVariables(uniqueVars);
 
-            // Suggestion Logic
             const cursor = textareaRef.current.selectionStart;
             const textBefore = value.slice(0, cursor);
             const lastTrigger = textBefore.lastIndexOf('{{');
@@ -133,7 +126,6 @@ export const BaseNode = ({ id, config, data }) => {
             
             updateNodeInternals(id);
 
-            // AUTO-CONNECTION LOGIC
             uniqueVars.forEach(v => {
                 const sourceNode = nodes.find(n => (n.data?.customName || n.id) === v);
                 if (sourceNode) {
@@ -161,7 +153,6 @@ export const BaseNode = ({ id, config, data }) => {
                 }
             });
 
-            // CLEANUP ORPHANED EDGES
             const currentEdges = useStore.getState().edges;
             const orphanedEdges = currentEdges.filter(edge =>
                 edge.target === id &&
@@ -204,7 +195,6 @@ export const BaseNode = ({ id, config, data }) => {
     const renderHighlightedText = (text) => {
         if (!text) return null;
         
-        // Split text by {{variable}} patterns while keeping the delimiters
         const parts = text.split(/(\{\{\s*[a-zA-Z0-9_$-]+\s*\}\})/g);
         
         return parts.map((part, i) => {
@@ -240,13 +230,11 @@ export const BaseNode = ({ id, config, data }) => {
                 return (
                     <div className="relative flex flex-col gap-3">
                         <div className="relative">
-                            {/* Syntax Highlighting Overlay (Behind) */}
                             <div 
                                 aria-hidden="true"
                                 className="absolute inset-0 w-full h-full pointer-events-none px-4 py-3 text-xs font-mono leading-relaxed whitespace-pre-wrap break-words border border-transparent select-none overflow-hidden text-slate-300"
                             >
                                 {renderHighlightedText(localText)}
-                                {/* Invisible char at end to fix line-break alignment */}
                                 <span className="h-full invisible">{" "}</span>
                             </div>
 
@@ -291,7 +279,6 @@ export const BaseNode = ({ id, config, data }) => {
                             )}
                         </div>
 
-                        {/* Variable Badges Display */}
                         {variables.length > 0 && (
                             <div className="">
                                 <h2 className="text-xs font-semibold text-slate-400 mb-2">Variables</h2>
@@ -388,7 +375,6 @@ export const BaseNode = ({ id, config, data }) => {
             className={`rounded-2xl bg-[#0d1117]/60 backdrop-blur-xl border ${error ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-slate-800/50 shadow-2xl'} transition-all duration-300 hover:border-primary/40 group relative`}
             style={{ width: `${width}px` }}
         >
-            {/* Background Decorations */}
             <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden rounded-2xl">
                 <img src="/purple_bg.webp" alt="" className="w-full h-full object-cover mix-blend-overlay object-right" />
             </div>
@@ -396,7 +382,6 @@ export const BaseNode = ({ id, config, data }) => {
                 <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1.5px, transparent 0)', backgroundSize: '24px 24px' }} />
             </div>
 
-            {/* Target Handles (Left) */}
             {allInputs.map((h, idx) => (
                 <div key={h.id} className="absolute !left-[-8px] z-20" style={{ top: h.style?.top || '50%', transform: 'translateY(-50%)' }}>
                     <span className="animate-ping absolute inline-flex -top-2.5 -right-0.5 min-w-5 min-h-5 rounded-full bg-white opacity-20" />
@@ -409,7 +394,6 @@ export const BaseNode = ({ id, config, data }) => {
                 </div>
             ))}
 
-            {/* Source Handles (Right) */}
             {outputs.map((h, idx) => (
                 <div key={h.id} className="absolute !right-[-8px] z-20" style={{ top: h.style?.top || '50%', transform: 'translateY(-50%)' }}>
                     <span className="animate-ping absolute inline-flex -top-2.5 -right-0.5 min-w-5 min-h-5 rounded-full bg-white opacity-20" />
@@ -421,7 +405,6 @@ export const BaseNode = ({ id, config, data }) => {
                     />
                 </div>
             ))}
-            {/* Header */}
             <div className="px-4 py-3 bg-slate-900/40 border-b border-slate-800 flex items-center justify-between relative overflow-hidden z-10">
                 <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} to-transparent rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
                 <div className="flex items-center gap-3 relative z-10">
@@ -435,9 +418,7 @@ export const BaseNode = ({ id, config, data }) => {
                 </Button>
             </div>
 
-            {/* Content */}
             <div className="p-4 flex flex-col gap-4 relative z-10">
-                {/* Node Name Field (Always Present) */}
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Node Name</label>

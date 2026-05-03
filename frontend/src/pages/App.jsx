@@ -15,7 +15,7 @@ import { useStore } from '../store/store';
 function App() {
   const [isSavedFlowsOpen, setIsSavedFlowsOpen] = useState(false);
   const [isNamingModalOpen, setIsNamingModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('create'); // 'create' or 'rename'
+  const [modalMode, setModalMode] = useState('create');
 
   const { clearCanvas, resetCanvas, setCurrentProjectName, saveToHistory, nodes, edges, currentProjectName } = useStore(state => ({
     clearCanvas: state.clearCanvas,
@@ -42,15 +42,12 @@ function App() {
       const hasExistingContent = nodes.length > 0;
       const prevName = currentProjectName === 'Untitled Pipeline' ? 'Previous Pipeline' : currentProjectName;
 
-      // 1. Save current state to history before clearing
       if (hasExistingContent) {
         saveToHistory(null, { nodes: nodes.length, edges: edges.length });
       }
 
-      // 2. Reset workspace
       clearCanvas();
 
-      // 3. Set the new name
       setCurrentProjectName(name);
 
       toast.success((t) => (
@@ -66,7 +63,6 @@ function App() {
         </div>
       ), { icon: '✨', duration: 5000 });
     } else {
-      // Just Rename Mode
       setCurrentProjectName(name);
       toast.success(`Pipeline renamed to "${name}"`, { icon: '📝' });
     }

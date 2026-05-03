@@ -77,7 +77,7 @@ export const NODE_CONFIGS = {
             {
                 key: 'model',
                 label: 'Model',
-                type: 'modelSelect', // Special type for our custom model selector
+                type: 'modelSelect',
                 default: 'gpt-4'
             }
         ]
@@ -87,7 +87,7 @@ export const NODE_CONFIGS = {
         title: 'Text Content',
         icon: DocumentTextIcon,
         themeColor: 'primary',
-        inputs: [], // Dynamically generated in BaseNode for this specific type
+        inputs: [],
         outputs: [{ id: 'output' }],
         fields: [
             {
@@ -96,7 +96,7 @@ export const NODE_CONFIGS = {
                 type: 'textarea',
                 default: '',
                 placeholder: 'Type {{variable}} to create handles...',
-                isDynamic: true // Flag for special text variable logic
+                isDynamic: true
             }
         ]
     },

@@ -46,7 +46,6 @@ export const useStore = create(
                 const nodeToRemove = get().nodes.find(n => n.id === id);
                 const variableName = nodeToRemove?.data?.customName || id;
                 
-                // Clean up variable references first
                 get().removeVariableReferences(variableName);
 
                 set({
@@ -98,7 +97,6 @@ export const useStore = create(
                 });
             },
 
-            // History Actions
             saveToHistory: (title, stats) => {
                 const { nodes, edges, currentFlowId, history, currentProjectName } = get();
                 const flowId = currentFlowId || Date.now();
@@ -134,7 +132,6 @@ export const useStore = create(
 
                         Object.keys(newData).forEach((key) => {
                             if (typeof newData[key] === 'string' && newData[key].includes(`{{${variableName}}}`)) {
-                                // Remove the variable reference. 
                                 newData[key] = newData[key].replace(`{{${variableName}}}`, '').replace(/\s\s+/g, ' ').trim();
                                 hasChanged = true;
                             }
@@ -154,7 +151,6 @@ export const useStore = create(
                         const newData = { ...node.data };
                         let hasChanged = false;
 
-                        // Scan all fields for the old variable pattern
                         Object.keys(newData).forEach((key) => {
                             if (typeof newData[key] === 'string' && newData[key].includes(`{{${oldName}}}`)) {
                                 newData[key] = newData[key].replace(`{{${oldName}}}`, `{{${newName}}}`);
@@ -185,7 +181,7 @@ export const useStore = create(
             setCurrentFlowId: (currentFlowId) => set({ currentFlowId }),
         }),
         {
-            name: 'workflow-storage', // unique name for localStorage key
+            name: 'workflow-storage',
         }
     )
 );

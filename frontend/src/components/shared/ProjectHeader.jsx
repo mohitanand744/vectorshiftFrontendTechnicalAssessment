@@ -24,7 +24,7 @@ export const ProjectHeader = ({ onNewProject, onRename }) => {
                 <div className="flex flex-col items-start">
                     <span className="hidden md:block text-[10px] font-black text-violet-400 uppercase tracking-[0.2em] leading-none mb-1.5">Active Pipeline</span>
                     <div className="flex items-center gap-2 group cursor-pointer" onClick={onRename}>
-                        <h2 className="text-sm md:text-lg font-bold text-white tracking-tight leading-none truncate min-w-[100px] md:max-w-[150px] md:max-w-none">{currentProjectName}</h2>
+                        <h2 className="text-sm md:text-lg font-bold text-white tracking-tight leading-none truncate min-w-[100px] md:max-w-fit md:max-w-none">{currentProjectName}</h2>
                         <PencilSquareIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-500 group-hover:text-violet-400 transition-colors" />
                     </div>
                 </div>

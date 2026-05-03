@@ -29,11 +29,9 @@ def parse_pipeline(pipeline: dict = Body(...)):
     num_nodes = len(nodes)
     num_edges = len(edges)
     
-    # DAG detection using Kahn's algorithm
     adj = defaultdict(list)
     in_degree = {node['id']: 0 for node in nodes}
     
-    # Build adjacency list and calculate in-degrees
     for edge in edges:
         u = edge['source']
         v = edge['target']
@@ -41,7 +39,6 @@ def parse_pipeline(pipeline: dict = Body(...)):
             adj[u].append(v)
             in_degree[v] += 1
         
-    # Queue for nodes with no incoming edges
     queue = deque([u for u in in_degree if in_degree.get(u, 0) == 0])
     visited_count = 0
     
@@ -53,7 +50,6 @@ def parse_pipeline(pipeline: dict = Body(...)):
             if in_degree[v] == 0:
                 queue.append(v)
                 
-    # If visited_count equals total nodes, it's a DAG (no cycles)
     is_dag = visited_count == num_nodes
     
     return {

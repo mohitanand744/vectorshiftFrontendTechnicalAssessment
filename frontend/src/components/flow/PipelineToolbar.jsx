@@ -27,7 +27,6 @@ export const PipelineToolbar = () => {
     const onNodeClick = (type) => {
         const { x, y, zoom } = getViewport();
 
-        // Calculate center of the viewport
         const center = {
             x: -x / zoom + (window.innerWidth > 768 ? (window.innerWidth - 320) : window.innerWidth) / (2 * zoom),
             y: -y / zoom + window.innerHeight / (2 * zoom),
@@ -43,7 +42,6 @@ export const PipelineToolbar = () => {
 
         addNode(newNode);
 
-        // On mobile, close the drawer after adding
         if (window.innerWidth < 768) {
             setIsOpen(false);
         }

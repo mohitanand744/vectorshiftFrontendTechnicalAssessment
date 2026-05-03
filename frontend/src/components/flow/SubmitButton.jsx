@@ -2,8 +2,7 @@ import { useStore } from '../../store/store';
 import { shallow } from 'zustand/shallow';
 import { toast } from 'react-hot-toast';
 import { Button } from '../ui/Button';
-import { useState } from 'react';
-import { PipelineNamingModal } from '../shared/PipelineNamingModal';
+import { pipelineApi } from '../../api/pipeline';
 
 const selector = (state) => ({
     nodes: state.nodes,
@@ -15,8 +14,6 @@ const selector = (state) => ({
 
 export const SubmitButton = () => {
     const { nodes, edges } = useStore(selector, shallow);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [lastStats, setLastStats] = useState(null);
 
 
     const handleSubmit = async () => {
@@ -49,21 +46,10 @@ export const SubmitButton = () => {
         const loadingToast = toast.loading('Analyzing pipeline structure...');
 
         try {
-            const response = await fetch('http://localhost:8000/pipelines/parse', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ nodes, edges })
-            });
-
-            if (!response.ok) throw new Error('Backend analysis failed');
-
-            const data = await response.json();
+            const data = await pipelineApi.parse({ nodes, edges });
 
             toast.dismiss(loadingToast);
 
-            // Success modal or toast with results
             toast.success(
                 (t) => (
                     <div className="flex flex-col gap-2">
@@ -78,7 +64,6 @@ export const SubmitButton = () => {
                 { duration: 5000 }
             );
 
-            // Silently save progress to history under the current project name
             useStore.getState().saveToHistory(null, {
                 nodes: data.num_nodes,
                 edges: data.num_edges,
