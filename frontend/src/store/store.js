@@ -170,6 +170,12 @@ export const useStore = create(
                 });
             },
 
+            resetCanvas: () => set({ 
+                nodes: [], 
+                edges: [],
+                nodeIDs: {}
+            }),
+
             removeHistoryItem: (id) => {
                 set({ history: get().history.filter(item => item.id !== id) });
             },

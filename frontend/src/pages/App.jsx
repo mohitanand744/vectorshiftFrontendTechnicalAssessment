@@ -17,8 +17,9 @@ function App() {
   const [isNamingModalOpen, setIsNamingModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('create'); // 'create' or 'rename'
 
-  const { clearCanvas, setCurrentProjectName, saveToHistory, nodes, edges, currentProjectName } = useStore(state => ({
+  const { clearCanvas, resetCanvas, setCurrentProjectName, saveToHistory, nodes, edges, currentProjectName } = useStore(state => ({
     clearCanvas: state.clearCanvas,
+    resetCanvas: state.resetCanvas,
     setCurrentProjectName: state.setCurrentProjectName,
     saveToHistory: state.saveToHistory,
     nodes: state.nodes,
@@ -110,6 +111,20 @@ function App() {
           />
 
           <div className="absolute top-8 right-8 z-10 flex items-center gap-4">
+            {nodes.length > 0 && (
+              <Button
+                onClick={() => {
+                  resetCanvas();
+                  toast.success('Canvas cleared', { icon: '🧹' });
+                }}
+                variant="dangerPill"
+                title="Clear all nodes and edges from the canvas"
+                className="animate-in fade-in slide-in-from-right-4 duration-300"
+              >
+                Clear
+              </Button>
+            )}
+
             <Button
               onClick={() => setIsSavedFlowsOpen(true)}
               variant="pill"

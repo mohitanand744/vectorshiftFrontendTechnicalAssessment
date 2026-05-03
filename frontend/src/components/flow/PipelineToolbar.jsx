@@ -115,7 +115,7 @@ export const PipelineToolbar = () => {
                     </section>
 
                     <section className="flex flex-col gap-5">
-                        <h2 className="text-[13px] font-bold text-violet-400 uppercase tracking-widest px-1">Processing</h2>
+                        <h2 className="text-[13px] font-bold text-violet-400 uppercase tracking-widest px-1">Processing Nodes</h2>
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                             <DraggableNode type='api' label='API' icon={CommandLineIcon} color="indigo" onClick={onNodeClick} />
                             <DraggableNode type='filter' label='Filter' icon={FunnelIcon} color="amber" onClick={onNodeClick} />
@@ -124,7 +124,7 @@ export const PipelineToolbar = () => {
                     </section>
 
                     <section className="flex flex-col gap-5">
-                        <h2 className="text-[13px] font-bold text-violet-400 uppercase tracking-widest px-1">Logic & Timing</h2>
+                        <h2 className="text-[13px] font-bold text-violet-400 uppercase tracking-widest px-1">Logic & Timing Nodes</h2>
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                             <DraggableNode type='condition' label='Condition' icon={ArrowsRightLeftIcon} color="cyan" onClick={onNodeClick} />
                             <DraggableNode type='delay' label='Delay' icon={ClockIcon} color="orange" onClick={onNodeClick} />
